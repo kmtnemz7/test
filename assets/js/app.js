@@ -272,6 +272,7 @@ function dropdown(rootId, items){
   
   summary.addEventListener('click', (e) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent bubbling
     if (root.hasAttribute('open')) {
       root.removeAttribute('open');
     } else {
@@ -280,6 +281,8 @@ function dropdown(rootId, items){
   });
   
   menu.addEventListener('click', (e) => {
+    e.stopPropagation(); // CRITICAL: Stop the click from bubbling up
+    
     const k = e.target?.dataset?.k;
     if (!k) return;
     
