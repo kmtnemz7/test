@@ -270,64 +270,27 @@ function dropdown(rootId, items){
   
   menu.innerHTML = items.map(([key, text])=>`<button data-k="${key}">${text}</button>`).join('');
   
+  // Open/close dropdown
   summary.addEventListener('click', (e) => {
     e.preventDefault();
-    e.stopPropagation(); // Prevent bubbling
-    if (root.hasAttribute('open')) {
-      root.removeAttribute('open');
-    } else {
-      root.setAttribute('open', '');
-    }
+    e.stopPropagation();
+    root.toggleAttribute('open');
   });
   
+  // Handle selection
   menu.addEventListener('click', (e) => {
-    e.stopPropagation(); // CRITICAL: Stop the click from bubbling up
-    
+    e.stopPropagation(); // Critical fix
     const k = e.target?.dataset?.k;
     if (!k) return;
-    
     val.dataset.value = k === '__all' ? '' : k;
     val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
-    
     root.removeAttribute('open');
-    
     applyFilters();
   });
   
+  // Close on outside click
   document.addEventListener('click', (e) => {
-    if (!root.contains(e.target)) {
-      root.removeAttribute('open');
-    }
-  });
-  
-  root.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      root.removeAttribute('open');
-      summary.focus();
-    }
-  });
-  
-  menu.addEventListener('keydown', (e) => {
-    const buttons = Array.from(menu.querySelectorAll('button'));
-    const currentIndex = buttons.indexOf(e.target);
-    
-    switch(e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        const nextIndex = currentIndex < buttons.length - 1 ? currentIndex + 1 : 0;
-        buttons[nextIndex].focus();
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        const prevIndex = currentIndex > 0 ? currentIndex - 1 : buttons.length - 1;
-        buttons[prevIndex].focus();
-        break;
-      case 'Enter':
-      case ' ':
-        e.preventDefault();
-        e.target.click();
-        break;
-    }
+    if (!root.contains(e.target)) root.removeAttribute('open');
   });
 }
 
