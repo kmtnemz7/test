@@ -287,29 +287,6 @@ function dropdown(rootId, items){
     }
   });
 }
-  
-  // Handle selection
-  menu.addEventListener('click', (e) => {
-    e.stopPropagation();
-    
-    const k = e.target?.dataset?.k;
-    if (!k) return;
-    
-    val.dataset.value = k === '__all' ? '' : k;
-    val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
-    root.removeAttribute('open');
-    applyFilters();
-    
-    isMenuClick = false; // Reset flag
-  });
-  
-  // Close on outside click
-  document.addEventListener('click', (e) => {
-    if (!root.contains(e.target)) {
-      root.removeAttribute('open');
-    }
-  });
-}
 
 // ---- Modal Functions ----
 function openModal(id, unlocked=false, sig=null){
