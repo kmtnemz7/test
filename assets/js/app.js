@@ -122,20 +122,51 @@ function showPurchases() {
 }
 
 // ---- Dropdown Menu ----
-function dropdown(rootId, items){
-  const root = document.getElementById(rootId);
-  const val = root.querySelector('.value');
-  const menu = root.querySelector('.menu');
-  menu.innerHTML = items.map(([key, text])=><button data-k="${key}">${text}</button>).join('');
-  menu.addEventListener('click', (e)=>{
-    const k = e.target?.dataset?.k; if(!k) return;
-    val.dataset.value = k==='__all' ? '' : k;
-    val.textContent = items.find(x=>x[0]===k)?.[1] || items[0][1];
-    menu.style.display='none';
-    root.removeAttribute('open');
-    applyFilters();
+function initDropdownMenu() {
+  const menuTrigger = $('#menu-trigger');
+  const menuDropdown = $('#menu-dropdown');
+  
+  if (!menuTrigger || !menuDropdown) return;
+  
+  let isOpen = false;
+  
+  function openMenu() {
+    if (isOpen) return;
+    isOpen = true;
+    menuDropdown.style.display = 'block';
+    setTimeout(() => menuDropdown.classList.add('active'), 10);
+    menuTrigger.setAttribute('aria-expanded', 'true');
+    
+    const firstItem = menuDropdown.querySelector('a');
+    if (firstItem) firstItem.focus();
+  }
+  
+  function closeMenu() {
+    if (!isOpen) return;
+    isOpen = false;
+    menuDropdown.classList.remove('active');
+    setTimeout(() => menuDropdown.style.display = 'none', 300);
+    menuTrigger.setAttribute('aria-expanded', 'false');
+    menuTrigger.focus();
+  }
+  
+  menuTrigger.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isOpen) closeMenu();
+    else openMenu();
   });
-}
+  
+  menuDropdown.addEventListener('click', (e) => {
+    if (e.target.tagName === 'A') {
+      e.preventDefault();
+      const href = e.target.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        navigateTo(href.slice(1));
+      }
+      closeMenu();
+    }
+  });
   
   document.addEventListener('click', (e) => {
     if (isOpen && !menuTrigger.contains(e.target) && !menuDropdown.contains(e.target)) {
@@ -230,19 +261,38 @@ function applyFilters(){
 // ---- FIXED DROPDOWN FUNCTION ----
 function dropdown(rootId, items){
   const root = document.getElementById(rootId);
+  if (!root) return;
+  
+  const summary = root.querySelector('summary');
   const val = root.querySelector('.value');
   const menu = root.querySelector('.menu');
-  menu.innerHTML = items.map(([key, text])=><button data-k="${key}">${text}</button>).join('');
-  menu.addEventListener('click', (e)=>{
-    const k = e.target?.dataset?.k; if(!k) return;
-    val.dataset.value = k==='__all' ? '' : k;
-    val.textContent = items.find(x=>x[0]===k)?.[1] || items[0][1];
-    menu.style.display='none';
+  if (!val || !menu || !summary) return;
+  
+  menu.innerHTML = items.map(([key, text])=>`<button data-k="${key}">${text}</button>`).join('');
+  
+  // Open/close dropdown
+  summary.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    root.toggleAttribute('open');
+  });
+  
+  // Handle selection
+  menu.addEventListener('click', (e) => {
+    e.stopPropagation(); // Critical fix
+    const k = e.target?.dataset?.k;
+    if (!k) return;
+    val.dataset.value = k === '__all' ? '' : k;
+    val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
     root.removeAttribute('open');
     applyFilters();
   });
+  
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!root.contains(e.target)) root.removeAttribute('open');
+  });
 }
-
 
 // ---- Modal Functions ----
 function openModal(id, unlocked=false, sig=null){
