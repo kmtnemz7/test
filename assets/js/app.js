@@ -268,38 +268,24 @@ function dropdown(rootId, items){
   const menu = root.querySelector('.menu');
   if (!val || !menu || !summary) return;
   
-  menu.innerHTML = items.map(([key, text])=>`<button data-k="${key}">${text}</button>`).join('');
+  // Generate buttons
+  menu.innerHTML = items.map(([key, text])=>`<button type="button" data-k="${key}">${text}</button>`).join('');
   
-  // Open/close dropdown - but only when clicking the summary itself, not child elements
-  summary.addEventListener('click', (e) => {
-    // Only toggle if the click was directly on the summary or its immediate children (trigger/value)
-    // but NOT if it came from the menu
-    if (menu.contains(e.target)) {
-      return; // Don't toggle if clicking inside menu
-    }
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (root.hasAttribute('open')) {
+  // Add event listener to each button individually
+  menu.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const k = e.target.dataset.k;
+      if (!k) return;
+      
+      val.dataset.value = k === '__all' ? '' : k;
+      val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
+      
       root.removeAttribute('open');
-    } else {
-      root.setAttribute('open', '');
-    }
-  });
-  
-  // Handle selection
-  menu.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation(); // Critical fix
-    
-    const k = e.target?.dataset?.k;
-    if (!k) return;
-    
-    val.dataset.value = k === '__all' ? '' : k;
-    val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
-    root.removeAttribute('open');
-    applyFilters();
+      applyFilters();
+    });
   });
   
   // Close on outside click
