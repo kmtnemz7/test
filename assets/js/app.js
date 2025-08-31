@@ -268,22 +268,24 @@ function dropdown(rootId, items){
   const menu = root.querySelector('.menu');
   if (!val || !menu || !summary) return;
   
-  menu.innerHTML = items.map(([key, text])=>`<button data-k="${key}">${text}</button>`).join('');
+  // Generate buttons
+  menu.innerHTML = items.map(([key, text])=>`<button type="button" data-k="${key}">${text}</button>`).join('');
   
-  // Handle selection - prevent details from closing
-  menu.addEventListener('click', (e) => {
-    e.preventDefault(); // Prevent default details behavior
-    e.stopPropagation(); // Stop event from bubbling to details
-    
-    const k = e.target?.dataset?.k;
-    if (!k) return;
-    
-    val.dataset.value = k === '__all' ? '' : k;
-    val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
-    
-    // Manually close the details element
-    root.removeAttribute('open');
-    applyFilters();
+  // Add event listener to each button individually
+  menu.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const k = e.target.dataset.k;
+      if (!k) return;
+      
+      val.dataset.value = k === '__all' ? '' : k;
+      val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
+      
+      root.removeAttribute('open');
+      applyFilters();
+    });
   });
   
   // Close on outside click
