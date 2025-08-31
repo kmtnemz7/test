@@ -263,41 +263,45 @@ function dropdown(rootId, items){
   const root = document.getElementById(rootId);
   if (!root) return;
 
-  const summary = root.querySelector('summary');          // add back
+  const summary = root.querySelector('summary');
   const val = root.querySelector('.value');
   const menu = root.querySelector('.menu');
-  if (!val || !menu || !summary) return;
+  if (!summary || !val || !menu) return;
 
-  menu.innerHTML = items.map(([key, text])=>`<button type="button" data-k="${key}">${text}</button>`).join('');
+  // build options as real buttons
+  menu.innerHTML = items.map(([k,t]) => `<button type="button" data-k="${k}">${t}</button>`).join('');
 
-  let fromMenuPointer = false;
+  let fromMenu = false;
 
-  // mark that the click originated in the menu (fires before summary's click)
-  menu.addEventListener('mousedown', () => { fromMenuPointer = true; });
+  // keep menu open during option press, and ensure the event doesn't bubble up
+  menu.addEventListener('pointerdown', (e) => { fromMenu = true; e.stopPropagation(); });
 
-  // replace native toggle to avoid closing when selecting an option
+  // take over details toggle; block native summary toggle
+  summary.addEventListener('pointerdown', (e) => e.preventDefault());
   summary.addEventListener('click', (e) => {
-    if (fromMenuPointer) { fromMenuPointer = false; e.preventDefault(); return; }
     e.preventDefault();
-    if (root.hasAttribute('open')) root.removeAttribute('open');
-    else root.setAttribute('open','');
+    if (fromMenu) { fromMenu = false; return; }
+    root.toggleAttribute('open');
   });
 
-  // option selection
+  // robust option selection
   menu.addEventListener('click', (e) => {
     e.stopPropagation();
     const btn = e.target.closest('button[data-k]');
     if (!btn) return;
     const k = btn.dataset.k;
+
     val.dataset.value = (k === '__all') ? '' : k;
-    val.textContent = items.find(x=>x[0]===k)?.[1] || items[0][1];
+    const found = items.find(x => x[0] === k);
+    if (found) val.textContent = found[1];
+
     root.removeAttribute('open');
+    fromMenu = false;
     applyFilters();
-    fromMenuPointer = false;
   });
 
   // outside click closes
-  document.addEventListener('click', (e) => {
+  document.addEventListener('pointerdown', (e) => {
     if (!root.contains(e.target)) root.removeAttribute('open');
   });
 }
