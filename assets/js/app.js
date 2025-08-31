@@ -270,42 +270,20 @@ function dropdown(rootId, items){
   
   menu.innerHTML = items.map(([key, text])=>`<button data-k="${key}">${text}</button>`).join('');
   
-  let isMenuClick = false;
-  
-  // Mark when clicking in menu
-  menu.addEventListener('mousedown', () => {
-    isMenuClick = true;
-  });
-  
-  // Reset flag after summary processes click
-  summary.addEventListener('click', (e) => {
-    if (isMenuClick) {
-      isMenuClick = false;
-      return; // Don't toggle if clicking inside menu
-    }
-    
-    e.preventDefault();
-    
-    if (root.hasAttribute('open')) {
-      root.removeAttribute('open');
-    } else {
-      root.setAttribute('open', '');
-    }
-  });
-  
-  // Handle selection
+  // Handle selection - prevent details from closing
   menu.addEventListener('click', (e) => {
-    e.stopPropagation();
+    e.preventDefault(); // Prevent default details behavior
+    e.stopPropagation(); // Stop event from bubbling to details
     
     const k = e.target?.dataset?.k;
     if (!k) return;
     
     val.dataset.value = k === '__all' ? '' : k;
     val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
+    
+    // Manually close the details element
     root.removeAttribute('open');
     applyFilters();
-    
-    isMenuClick = false; // Reset flag
   });
   
   // Close on outside click
