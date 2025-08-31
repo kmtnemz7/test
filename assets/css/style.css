@@ -457,9 +457,15 @@ footer {
   position: relative;
 }
 
+.select[open] {
+  /* lift the open dropdown above siblings */
+  z-index: 9999;
+}
+
 .select summary {
   list-style: none;
   cursor: pointer;
+  user-select: none;
 }
 
 .select summary::-webkit-details-marker {
@@ -494,7 +500,10 @@ footer {
   border-radius: 12px;
   max-height: 260px;
   overflow: auto;
-  z-index: 1200;
+  /* ensure menu sits on top and receives input */
+  z-index: 10000;
+  pointer-events: auto;
+
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 0.3s ease-out, transform 0.3s ease-out;
@@ -525,6 +534,18 @@ footer {
   background: rgba(168, 85, 247, .15);
   outline: none;
 }
+
+/* prevent ancestors from clipping or intercepting */
+.filters .card,
+.filters .grid {
+  overflow: visible !important;
+}
+
+/* isolate stacking so transforms/backdrop-filter elsewhere don't trap the menu */
+.filters {
+  isolation: isolate;
+}
+
 /* Purchase Options Modal Styles */
 .purchase-options-modal {
   position: fixed;
