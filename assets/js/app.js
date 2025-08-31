@@ -270,29 +270,38 @@ function dropdown(rootId, items){
   
   menu.innerHTML = items.map(([key, text])=>`<button data-k="${key}">${text}</button>`).join('');
   
-  // Open/close dropdown
+  // Open/close dropdown - but only when clicking the summary itself, not child elements
   summary.addEventListener('click', (e) => {
+    // Only toggle if the click was directly on the summary or its immediate children (trigger/value)
+    // but NOT if it came from the menu
+    if (menu.contains(e.target)) {
+      return; // Don't toggle if clicking inside menu
+    }
+    
     e.preventDefault();
     e.stopPropagation();
-    root.toggleAttribute('open');
+    
+    if (root.hasAttribute('open')) {
+      root.removeAttribute('open');
+    } else {
+      root.setAttribute('open', '');
+    }
   });
   
   // Handle selection
   menu.addEventListener('click', (e) => {
+    e.preventDefault();
     e.stopPropagation(); // Critical fix
+    
     const k = e.target?.dataset?.k;
     if (!k) return;
+    
     val.dataset.value = k === '__all' ? '' : k;
     val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
     root.removeAttribute('open');
     applyFilters();
   });
   
-  // Close on outside click
-  document.addEventListener('click', (e) => {
-    if (!root.contains(e.target)) root.removeAttribute('open');
-  });
-}
   // Close on outside click
   document.addEventListener('click', (e) => {
     if (!root.contains(e.target)) {
