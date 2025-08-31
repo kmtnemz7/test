@@ -259,7 +259,8 @@ function applyFilters(){
 }
 
 // ---- FIXED DROPDOWN FUNCTION ----
-function dropdown(rootId, items){
+// ---- FIXED DROPDOWN FUNCTION ----
+function dropdown(rootId, items) {
   const root = document.getElementById(rootId);
   if (!root) return;
   
@@ -269,7 +270,9 @@ function dropdown(rootId, items){
   if (!val || !menu || !summary) return;
   
   // Generate buttons
-  menu.innerHTML = items.map(([key, text])=>`<button type="button" data-k="${key}">${text}</button>`).join('');
+  menu.innerHTML = items
+    .map(([key, text]) => `<button type="button" data-k="${key}">${text}</button>`)
+    .join('');
   
   // Add event listener to each button individually
   menu.querySelectorAll('button').forEach(button => {
@@ -277,24 +280,28 @@ function dropdown(rootId, items){
       e.preventDefault();
       e.stopPropagation();
       
-      const k = e.target.dataset.k;
+      const k = e.currentTarget.dataset.k; // use currentTarget to ensure button ref
       if (!k) return;
       
-      val.dataset.value = k === '__all' ? '' : k;
-      val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
+      val.dataset.value = (k === '__all') ? '' : k;
+      val.textContent = (items.find(([kk]) => String(kk) === k) || items[0])[1];
       
       root.removeAttribute('open');
       applyFilters();
     });
   });
   
-  // Close on outside click
-  document.addEventListener('click', (e) => {
-    if (!root.contains(e.target)) {
-      root.removeAttribute('open');
-    }
-  });
+  // Close on outside click (attach only once)
+  if (!root._dropdownListenerAttached) {
+    document.addEventListener('click', (e) => {
+      if (!root.contains(e.target)) {
+        root.removeAttribute('open');
+      }
+    });
+    root._dropdownListenerAttached = true;
+  }
 }
+
 
 // ---- Modal Functions ----
 function openModal(id, unlocked=false, sig=null){
