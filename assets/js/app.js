@@ -122,51 +122,20 @@ function showPurchases() {
 }
 
 // ---- Dropdown Menu ----
-function initDropdownMenu() {
-  const menuTrigger = $('#menu-trigger');
-  const menuDropdown = $('#menu-dropdown');
-  
-  if (!menuTrigger || !menuDropdown) return;
-  
-  let isOpen = false;
-  
-  function openMenu() {
-    if (isOpen) return;
-    isOpen = true;
-    menuDropdown.style.display = 'block';
-    setTimeout(() => menuDropdown.classList.add('active'), 10);
-    menuTrigger.setAttribute('aria-expanded', 'true');
-    
-    const firstItem = menuDropdown.querySelector('a');
-    if (firstItem) firstItem.focus();
-  }
-  
-  function closeMenu() {
-    if (!isOpen) return;
-    isOpen = false;
-    menuDropdown.classList.remove('active');
-    setTimeout(() => menuDropdown.style.display = 'none', 300);
-    menuTrigger.setAttribute('aria-expanded', 'false');
-    menuTrigger.focus();
-  }
-  
-  menuTrigger.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isOpen) closeMenu();
-    else openMenu();
+function dropdown(rootId, items){
+  const root = document.getElementById(rootId);
+  const val = root.querySelector('.value');
+  const menu = root.querySelector('.menu');
+  menu.innerHTML = items.map(([key, text])=><button data-k="${key}">${text}</button>).join('');
+  menu.addEventListener('click', (e)=>{
+    const k = e.target?.dataset?.k; if(!k) return;
+    val.dataset.value = k==='__all' ? '' : k;
+    val.textContent = items.find(x=>x[0]===k)?.[1] || items[0][1];
+    menu.style.display='none';
+    root.removeAttribute('open');
+    applyFilters();
   });
-  
-  menuDropdown.addEventListener('click', (e) => {
-    if (e.target.tagName === 'A') {
-      e.preventDefault();
-      const href = e.target.getAttribute('href');
-      if (href && href.startsWith('#')) {
-        navigateTo(href.slice(1));
-      }
-      closeMenu();
-    }
-  });
+}
   
   document.addEventListener('click', (e) => {
     if (isOpen && !menuTrigger.contains(e.target) && !menuDropdown.contains(e.target)) {
