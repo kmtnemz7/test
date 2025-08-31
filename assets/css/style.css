@@ -229,16 +229,23 @@ nav {
   transform: translateY(-1px);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 10px 44px rgba(168, 85, 247, .25);
 }
+#grid .prompt-card {
+  pointer-events: none; /* disable all clicks on the card */
+}
+
 #grid .prompt-card .btn {
+  pointer-events: auto; /* re-enable clicks only on buttons */
   color: #ffffff;
   background: rgba(255, 255, 255, .05);
 }
+
 #grid .prompt-card .btn.glow {
   background: linear-gradient(90deg, var(--g1), var(--g2));
   color: #0b0d12;
   border: none;
   box-shadow: 0 10px 44px rgba(168, 85, 247, .25);
 }
+
 #grid .prompt-card .btn.glow:hover {
   transform: translateY(-1px);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 10px 44px rgba(168, 85, 247, .25);
