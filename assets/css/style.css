@@ -484,9 +484,9 @@ footer {
   font-size: 10px;
   transition: transform 0.2s ease;
 }
-
-.select[open] .trigger::after {
-  transform: rotate(180deg);
+.select[open] {
+  position: relative;
+  z-index: 999999; /* higher than all other elements */
 }
 
 .menu {
@@ -503,19 +503,15 @@ footer {
   /* ensure menu sits on top and receives input */
   z-index: 10000;
   pointer-events: auto;
-
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 0.3s ease-out, transform 0.3s ease-out;
   will-change: opacity, transform;
 }
-
 .select[open] .menu {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
+  position: absolute;
+  z-index: 1000000; /* top of the page stacking */
 }
-
 .menu button {
   display: block;
   width: 100%;
