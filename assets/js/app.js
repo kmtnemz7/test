@@ -230,53 +230,17 @@ function applyFilters(){
 // ---- FIXED DROPDOWN FUNCTION ----
 function dropdown(rootId, items){
   const root = document.getElementById(rootId);
-  if (!root) return;
-  
-  const summary = root.querySelector('summary');
   const val = root.querySelector('.value');
   const menu = root.querySelector('.menu');
-  if (!val || !menu || !summary) return;
-  
-  menu.innerHTML = items.map(([key, text])=>`<button data-k="${key}">${text}</button>`).join('');
-  
-  // Open/close dropdown
-  summary.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    root.toggleAttribute('open');
-  });
-  
-  // Handle selection
-  menu.addEventListener('click', (e) => {
-    e.stopPropagation(); // Critical fix
-    const k = e.target?.dataset?.k;
-    if (!k) return;
-    val.dataset.value = k === '__all' ? '' : k;
-    val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
+  menu.innerHTML = items.map(([key, text])=><button data-k="${key}">${text}</button>).join('');
+  menu.addEventListener('click', (e)=>{
+    const k = e.target?.dataset?.k; if(!k) return;
+    val.dataset.value = k==='__all' ? '' : k;
+    val.textContent = items.find(x=>x[0]===k)?.[1] || items[0][1];
+    menu.style.display='none';
     root.removeAttribute('open');
     applyFilters();
   });
-  
-  // Close on outside click
-  document.addEventListener('click', (e) => {
-    if (!root.contains(e.target)) root.removeAttribute('open');
-  });
-}
-  
-  // Close on outside click
-  document.addEventListener('click', (e) => {
-    if (!root.contains(e.target)) root.removeAttribute('open');
-  });
-}
-  // Close on outside click (attach only once)
-  if (!root._dropdownListenerAttached) {
-    document.addEventListener('click', (e) => {
-      if (!root.contains(e.target)) {
-        root.removeAttribute('open');
-      }
-    });
-    root._dropdownListenerAttached = true;
-  }
 }
 
 
