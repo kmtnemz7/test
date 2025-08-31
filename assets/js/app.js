@@ -262,31 +262,46 @@ function applyFilters(){
 function dropdown(rootId, items){
   const root = document.getElementById(rootId);
   if (!root) return;
-  
+
+  const summary = root.querySelector('summary');          // add back
   const val = root.querySelector('.value');
   const menu = root.querySelector('.menu');
-  if (!val || !menu) return;
-  
-  menu.innerHTML = items.map(([key, text])=>`<button data-k="${key}">${text}</button>`).join('');
-  
-  // Handle menu option selection
+  if (!val || !menu || !summary) return;
+
+  menu.innerHTML = items.map(([key, text])=>`<button type="button" data-k="${key}">${text}</button>`).join('');
+
+  let fromMenuPointer = false;
+
+  // mark that the click originated in the menu (fires before summary's click)
+  menu.addEventListener('mousedown', () => { fromMenuPointer = true; });
+
+  // replace native toggle to avoid closing when selecting an option
+  summary.addEventListener('click', (e) => {
+    if (fromMenuPointer) { fromMenuPointer = false; e.preventDefault(); return; }
+    e.preventDefault();
+    if (root.hasAttribute('open')) root.removeAttribute('open');
+    else root.setAttribute('open','');
+  });
+
+  // option selection
   menu.addEventListener('click', (e) => {
-    const k = e.target?.dataset?.k; 
-    if(!k) return;
-    
-    val.dataset.value = k==='__all' ? '' : k;
+    e.stopPropagation();
+    const btn = e.target.closest('button[data-k]');
+    if (!btn) return;
+    const k = btn.dataset.k;
+    val.dataset.value = (k === '__all') ? '' : k;
     val.textContent = items.find(x=>x[0]===k)?.[1] || items[0][1];
     root.removeAttribute('open');
     applyFilters();
+    fromMenuPointer = false;
   });
-  
-  // Close dropdown when clicking outside
+
+  // outside click closes
   document.addEventListener('click', (e) => {
-    if (!root.contains(e.target)) {
-      root.removeAttribute('open');
-    }
+    if (!root.contains(e.target)) root.removeAttribute('open');
   });
 }
+
 
 // ---- Modal Functions ----
 function openModal(id, unlocked=false, sig=null){
