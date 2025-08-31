@@ -259,8 +259,7 @@ function applyFilters(){
 }
 
 // ---- FIXED DROPDOWN FUNCTION ----
-// ---- FIXED DROPDOWN FUNCTION ----
-function dropdown(rootId, items) {
+function dropdown(rootId, items){
   const root = document.getElementById(rootId);
   if (!root) return;
   
@@ -269,28 +268,37 @@ function dropdown(rootId, items) {
   const menu = root.querySelector('.menu');
   if (!val || !menu || !summary) return;
   
-  // Generate buttons
-  menu.innerHTML = items
-    .map(([key, text]) => `<button type="button" data-k="${key}">${text}</button>`)
-    .join('');
+  menu.innerHTML = items.map(([key, text])=>`<button data-k="${key}">${text}</button>`).join('');
   
-  // Add event listener to each button individually
-  menu.querySelectorAll('button').forEach(button => {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const k = e.currentTarget.dataset.k; // use currentTarget to ensure button ref
-      if (!k) return;
-      
-      val.dataset.value = (k === '__all') ? '' : k;
-      val.textContent = (items.find(([kk]) => String(kk) === k) || items[0])[1];
-      
-      root.removeAttribute('open');
-      applyFilters();
-    });
+  // Open/close dropdown
+  summary.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    root.toggleAttribute('open');
   });
   
+  // Handle selection
+  menu.addEventListener('click', (e) => {
+    e.stopPropagation(); // Critical fix
+    const k = e.target?.dataset?.k;
+    if (!k) return;
+    val.dataset.value = k === '__all' ? '' : k;
+    val.textContent = items.find(x => x[0] === k)?.[1] || items[0][1];
+    root.removeAttribute('open');
+    applyFilters();
+  });
+  
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!root.contains(e.target)) root.removeAttribute('open');
+  });
+}
+  
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!root.contains(e.target)) root.removeAttribute('open');
+  });
+}
   // Close on outside click (attach only once)
   if (!root._dropdownListenerAttached) {
     document.addEventListener('click', (e) => {
