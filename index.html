@@ -15,24 +15,117 @@
 <div id="pageLoader" class="page-loader" aria-hidden="true">
   <div class="spinner"></div>
 </div>
-  <nav>
-    <div class="container navbar">
-      <a href="#" class="brand">PromptFi</a>
-      <div class="nav-actions">
-        <div class="dropdown-container" style="position: relative;">
-          <button id="menu-trigger" class="btn" aria-expanded="false" aria-haspopup="true">
-            Menu ▾
-          </button>
-          <div id="menu-dropdown" class="menu" style="display: none; position: absolute; top: calc(100% + 6px); right: 0; min-width: 160px; z-index: 1200;">
-            <a href="#explore">Explore</a>
-            <a href="#creators">Creators</a>
-            <a href="#purchases">My Purchases</a>
-          </div>
-        </div>
-        <button id="walletBtn" class="btn glow" style="padding: 12px 18px; border-radius: 14px;">Connect Wallet</button>
-      </div>
+<nav>
+  <style>
+    .ticker {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+    .t-tab {
+      font: 600 14px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--b, #334155);
+      background: var(--bg-2, #1a2332);
+      color: var(--fg, #fff);
+      cursor: pointer;
+      opacity: 0.85;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .t-tab.active {
+      background: rgba(59,130,246,.12);
+      border-color: rgba(59,130,246,.35);
+      opacity: 1;
+    }
+    .t-tab:hover {
+      transform: translateY(-1px);
+      border-color: var(--acc1, #3b82f6);
+    }
+    @media (max-width:900px) {
+      .ticker { display: none; }
+    }
+  </style>
+
+  <div class="container navbar">
+    <a href="#" class="brand">PromptFi</a>
+
+    <!-- Live token ticker -->
+    <div id="token-ticker" class="ticker" aria-live="polite">
+      <button class="t-tab active" data-view="price">$—</button>
+      <button class="t-tab" data-view="mc">MC —</button>
     </div>
-  </nav>
+
+    <div class="nav-actions">
+      <div class="dropdown-container" style="position: relative;">
+        <button id="menu-trigger" class="btn" aria-expanded="false" aria-haspopup="true">
+          Menu ▾
+        </button>
+        <div id="menu-dropdown" class="menu" style="display: none; position: absolute; top: calc(100% + 6px); right: 0; min-width: 160px; z-index: 1200;">
+          <a href="#explore">Explore</a>
+          <a href="#creators">Creators</a>
+          <a href="#purchases">My Purchases</a>
+        </div>
+      </div>
+      <button id="walletBtn" class="btn glow" style="padding: 12px 18px; border-radius: 14px;">Connect Wallet</button>
+    </div>
+  </div>
+
+  <script>
+  (() => {
+    const TOKEN = "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"; // fartcoin test token
+    const API  = `https://api.dexscreener.com/latest/dex/tokens/${TOKEN}`;
+
+    const $ticker   = document.getElementById('token-ticker');
+    const $priceBtn = $ticker.querySelector('[data-view="price"]');
+    const $mcBtn    = $ticker.querySelector('[data-view="mc"]');
+
+    let last = { priceUsd: null, marketCap: null };
+
+    function fmtUsd(n){
+      if (n == null) return "—";
+      const abs = Math.abs(n);
+      if (abs >= 1e9)  return `$${(n/1e9).toFixed(2)}B`;
+      if (abs >= 1e6)  return `$${(n/1e6).toFixed(2)}M`;
+      if (abs >= 1e3)  return `$${(n/1e3).toFixed(2)}K`;
+      if (abs < 0.01)  return `$${n.toFixed(6)}`;
+      return `$${n.toFixed(4)}`;
+    }
+
+    async function pull(){
+      try{
+        const r = await fetch(API, { cache: 'no-store' });
+        const j = await r.json();
+        const pair = (j.pairs || []).sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
+        if (!pair) return;
+        last.priceUsd = Number(pair.priceUsd);
+        last.marketCap = Number(pair.marketCap ?? pair.fdv);
+        render();
+      }catch(e){
+        // keep old values
+      }
+    }
+
+    function render(){
+      $priceBtn.textContent = fmtUsd(last.priceUsd);
+      $mcBtn.textContent    = `MC ${fmtUsd(last.marketCap)}`;
+    }
+
+    $ticker.addEventListener('click', (e) => {
+      const b = e.target.closest('.t-tab');
+      if (!b) return;
+      $ticker.querySelectorAll('.t-tab').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    });
+
+    pull();
+    setInterval(pull, 30000);
+  })();
+  </script>
+</nav>
+
 
   <div id="main-content">
     <section id="home" class="hero" style="display: block;">
