@@ -35,28 +35,34 @@
       opacity: 0.85;
       transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
     }
-    .t-tab.active {
-      background: rgba(59,130,246,.12);
-      border-color: rgba(59,130,246,.35);
-      opacity: 1;
-    }
     .t-tab:hover {
       transform: translateY(-1px);
       border-color: var(--acc1, #3b82f6);
     }
-    @media (max-width:900px) {
-      .ticker { display: none; }
-    }
+	@media (max-width:900px) {
+	  .ticker {
+	    gap: 4px;
+	    margin-left: auto;
+ 	   margin-right: auto;
+	  }
+	  .t-tab {
+	    font-size: 12px;
+	    padding: 6px 8px;
+	  }
+	}
   </style>
 
   <div class="container navbar">
     <a href="#" class="brand">PromptFi</a>
 
     <!-- Live token ticker -->
-    <div id="token-ticker" class="ticker" aria-live="polite">
-      <button class="t-tab active" data-view="price">$—</button>
-      <button class="t-tab" data-view="mc">MC —</button>
-    </div>
+	<a href="https://dexscreener.com/solana/9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump" 
+	   target="_blank" rel="noopener" 
+	   id="token-ticker" class="ticker" aria-live="polite"
+	   style="text-decoration: none;">
+	  <button class="t-tab active" data-view="price">$—</button>
+	  <button class="t-tab" data-view="mc">MC —</button>
+	</a>
 
     <div class="nav-actions">
       <div class="dropdown-container" style="position: relative;">
