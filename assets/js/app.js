@@ -35,6 +35,22 @@ const $$ = (s)=>Array.from(document.querySelectorAll(s));
 const toast=(m)=>{const t=$('#toast'); t.textContent=m; t.setAttribute('role', 'alert'); t.style.display='block'; setTimeout(()=>t.classList.add('active'), 10); setTimeout(()=>{t.classList.remove('active'); setTimeout(()=>t.style.display='none', 300);}, 1800);};
 const priceLabel=(n)=> (n<=0? 'FREE' : (Math.round(n*100)/100).toFixed(2)+' SOL');
 
+async function ensureBuffer(){
+  if (window.Buffer) return;
+  await new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js';
+    s.crossOrigin = 'anonymous';
+    s.referrerPolicy = 'no-referrer';
+    s.onload = res;
+    s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  if (!window.Buffer && window.buffer?.Buffer) window.Buffer = window.buffer.Buffer;
+  if (!window.Buffer) throw new Error('Buffer polyfill failed to load');
+}
+
+
 // ---- Reliable RPC init ----
 const PF_DEFAULT_RPC = "https://solana-mainnet.g.alchemy.com/v2/iI04YgCUWx3MQxT-Z0B1m";
 
@@ -445,6 +461,9 @@ async function buyPrompt(id){
     // ensure working RPC
     await ensureConnection();
 
+    // ensure Buffer polyfill exists
+    await ensureBuffer();
+
     const lamports = Math.round(p.price * solanaWeb3.LAMPORTS_PER_SOL);
     toast('Preparing transaction…');
 
@@ -477,6 +496,7 @@ async function buyPrompt(id){
     toast(e && e.message ? e.message : 'Payment failed or cancelled');
   }
 }
+
 
 // ---- Event Handlers ----
 function setupEventHandlers() {
