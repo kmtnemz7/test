@@ -60,24 +60,43 @@ const RPC_CANDIDATES = [
 ].filter(Boolean);
 
 async function ensureConnection() {
-  if (connection) return connection;
-  if (!window.solanaWeb3) throw new Error('SDK not loaded');
+  if (connection) {
+    // Test existing connection
+    try {
+      await connection.getLatestBlockhash('finalized');
+      return connection;
+    } catch (e) {
+      console.warn('Existing connection failed, creating new one');
+      connection = null;
+    }
+  }
+
+  if (!window.solanaWeb3) {
+    throw new Error('Solana Web3 SDK not loaded');
+  }
 
   let lastErr;
   for (const url of RPC_CANDIDATES) {
     try {
-      const c = new solanaWeb3.Connection(url, 'confirmed');
+      console.log('Trying RPC:', url);
+      const c = new solanaWeb3.Connection(url, {
+        commitment: 'confirmed',
+        confirmTransactionInitialTimeout: 60000
+      });
+      
+      // Test the connection
       await c.getLatestBlockhash('finalized');
       connection = c;
+      console.log('RPC connection successful:', url);
       return connection;
     } catch (e) {
       lastErr = e;
       console.warn('[RPC fail]', url, e?.message || e);
     }
   }
+  
   throw new Error(
-    `All RPC endpoints rejected. Last tried: ${RPC_CANDIDATES.at(-1)}. ` +
-    `Set localStorage.setItem("pf_rpc","${PF_DEFAULT_RPC}") — provider said: ${lastErr?.message || lastErr}`
+    `All RPC endpoints failed. Last error: ${lastErr?.message || lastErr}`
   );
 }
 
@@ -433,16 +452,26 @@ async function toggleWallet(){
 async function buyPrompt(id){
   try {
     const p = DATA.find(x=>x.id===id);
-    if (!p) return;
+    if (!p) {
+      toast('Prompt not found');
+      return;
+    }
 
     const briefEl = $('#uBrief');
     const contactEl = $('#uContact');
     const brief = briefEl?.value?.trim() || '';
     const contact = contactEl?.value?.trim() || '';
 
-    if (brief.length < 3) return toast('Please enter a short brief.');
-    if (!contact) return toast('Add your contact (email or Telegram).');
+    if (brief.length < 3) {
+      toast('Please enter a short brief.');
+      return;
+    }
+    if (!contact) {
+      toast('Add your contact (email or Telegram).');
+      return;
+    }
 
+    // Handle free prompts
     if (p.price <= 0) {
       savePurchase(id, 'FREE', brief, contact);
       openModal(id, true, null);
@@ -450,50 +479,180 @@ async function buyPrompt(id){
       return;
     }
 
-    // provider + wallet
+    // Check for Phantom wallet
     provider = await getProvider();
-    if (!provider || !provider.isPhantom) throw new Error('Phantom not found');
-    if (!walletPubkey) {
-      const resp = await provider.connect(); // triggers Phantom connect if not connected
-      walletPubkey = resp.publicKey;
+    if (!provider) {
+      toast('Please install Phantom wallet');
+      return;
+    }
+    
+    if (!provider.isPhantom) {
+      toast('Please use Phantom wallet');
+      return;
     }
 
-    // ensure working RPC
-    await ensureConnection();
+    // Connect wallet if not already connected
+    if (!walletPubkey) {
+      try {
+        const resp = await provider.connect();
+        walletPubkey = resp.publicKey;
+        console.log('Wallet connected:', walletPubkey.toString());
+      } catch (connectError) {
+        console.error('Wallet connection failed:', connectError);
+        if (connectError.message?.includes('User rejected')) {
+          toast('Wallet connection cancelled by user');
+        } else {
+          toast('Failed to connect wallet');
+        }
+        return;
+      }
+    }
 
-    // ensure Buffer polyfill exists
-    await ensureBuffer();
+    // Ensure RPC connection is working
+    try {
+      await ensureConnection();
+    } catch (rpcError) {
+      console.error('RPC connection failed:', rpcError);
+      toast('Network connection failed. Please try again.');
+      return;
+    }
+
+    // Ensure Buffer is available
+    try {
+      await ensureBuffer();
+    } catch (bufferError) {
+      console.error('Buffer polyfill failed:', bufferError);
+      toast('Browser compatibility issue. Please refresh and try again.');
+      return;
+    }
 
     const lamports = Math.round(p.price * solanaWeb3.LAMPORTS_PER_SOL);
+    console.log(`Payment amount: ${p.price} SOL = ${lamports} lamports`);
+    
     toast('Preparing transaction…');
 
-    const { blockhash } = await connection.getLatestBlockhash('finalized');
+    // Get latest blockhash with retry logic
+    let blockhash, lastValidBlockHeight;
+    try {
+      const result = await connection.getLatestBlockhash('finalized');
+      blockhash = result.blockhash;
+      lastValidBlockHeight = result.lastValidBlockHeight;
+      console.log('Got blockhash:', blockhash);
+    } catch (blockhashError) {
+      console.error('Failed to get blockhash:', blockhashError);
+      toast('Network error. Please try again.');
+      return;
+    }
 
+    // Validate recipient address
+    let recipientPubkey;
+    try {
+      recipientPubkey = new solanaWeb3.PublicKey(RECIPIENT);
+    } catch (addressError) {
+      console.error('Invalid recipient address:', addressError);
+      toast('Invalid recipient address');
+      return;
+    }
+
+    // Check if sender has enough SOL
+    try {
+      const balance = await connection.getBalance(walletPubkey);
+      const requiredBalance = lamports + 5000; // Add fee buffer
+      if (balance < requiredBalance) {
+        toast(`Insufficient SOL. Need ${(requiredBalance/solanaWeb3.LAMPORTS_PER_SOL).toFixed(4)} SOL`);
+        return;
+      }
+    } catch (balanceError) {
+      console.error('Failed to check balance:', balanceError);
+      // Continue anyway - let the transaction fail naturally
+    }
+
+    // Create transaction
     const tx = new solanaWeb3.Transaction({
       feePayer: walletPubkey,
       recentBlockhash: blockhash
-    }).add(
+    });
+
+    tx.add(
       solanaWeb3.SystemProgram.transfer({
         fromPubkey: walletPubkey,
-        toPubkey: new solanaWeb3.PublicKey(RECIPIENT),
+        toPubkey: recipientPubkey,
         lamports
       })
     );
 
+    console.log('Transaction created, requesting signature...');
     toast('Waiting for signature…');
 
-    // prompts Phantom and sends
-    const { signature } = await provider.signAndSendTransaction(tx);
+    // Sign and send transaction
+    let signature;
+    try {
+      const result = await provider.signAndSendTransaction(tx);
+      signature = result.signature;
+      console.log('Transaction signed and sent:', signature);
+    } catch (signError) {
+      console.error('Signing/sending failed:', signError);
+      
+      // Handle specific error types
+      if (signError.message?.includes('User rejected')) {
+        toast('Transaction cancelled by user');
+        return;
+      } else if (signError.message?.includes('insufficient funds')) {
+        toast('Insufficient SOL balance');
+        return;
+      } else if (signError.message?.includes('blockhash not found')) {
+        toast('Transaction expired. Please try again.');
+        return;
+      } else {
+        toast('Transaction failed: ' + (signError.message || 'Unknown error'));
+        return;
+      }
+    }
 
-    toast('Confirming (finalized)…');
-    await connection.confirmTransaction({ signature }, 'finalized');
+    toast('Confirming transaction…');
 
-    savePurchase(id, signature, brief, contact);
-    openModal(id, true, signature);
-    toast('Unlocked ✅');
-  } catch(e) {
-    console.error('Payment error:', e);
-    toast(e && e.message ? e.message : 'Payment failed or cancelled');
+    // Confirm transaction with timeout
+    try {
+      const confirmation = await Promise.race([
+        connection.confirmTransaction({
+          signature,
+          blockhash,
+          lastValidBlockHeight
+        }, 'finalized'),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Confirmation timeout')), 60000)
+        )
+      ]);
+
+      if (confirmation.value.err) {
+        console.error('Transaction failed on-chain:', confirmation.value.err);
+        toast('Transaction failed on blockchain');
+        return;
+      }
+
+      console.log('Transaction confirmed:', signature);
+      
+      // Save purchase and show success
+      savePurchase(id, signature, brief, contact);
+      openModal(id, true, signature);
+      toast('Purchase successful! ✅');
+      
+    } catch (confirmError) {
+      console.error('Confirmation failed:', confirmError);
+      
+      if (confirmError.message?.includes('timeout')) {
+        toast('Transaction is processing. Check your wallet in a few minutes.');
+        // Still save the purchase since transaction was sent
+        savePurchase(id, signature, brief, contact);
+        openModal(id, true, signature);
+      } else {
+        toast('Transaction confirmation failed');
+      }
+    }
+
+  } catch (error) {
+    console.error('Unexpected error in buyPrompt:', error);
+    toast('An unexpected error occurred: ' + (error.message || 'Unknown error'));
   }
 }
 
