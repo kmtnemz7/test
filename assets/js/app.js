@@ -400,7 +400,7 @@ async function connectWallet(){
   try {
     provider = await getProvider();
     if (!provider || !provider.isPhantom) { toast('Phantom not found. Install Phantom.'); return; }
-    const resp = await provider.connect();
+    const resp = await provider.connect(); // prompts Phantom
     walletPubkey = resp.publicKey;
     const addr = $('#addr');
     const walletBtn = $('#walletBtn');
@@ -453,32 +453,53 @@ async function buyPrompt(id){
       return;
     }
 
-    if (!walletPubkey) { await connectWallet(); if(!walletPubkey) return; }
+    // provider + wallet
+    provider = await getProvider();
+    if (!provider || !provider.isPhantom) throw new Error('Phantom not found');
+    if (!walletPubkey) {
+      const resp = await provider.connect(); // triggers Phantom connect if not connected
+      walletPubkey = resp.publicKey;
+    }
+
+    // connection lazy-init (in case it wasn't set on load)
+    if (!connection) {
+      if (!window.solanaWeb3) throw new Error('SDK not loaded');
+      connection = new solanaWeb3.Connection(
+        solanaWeb3.clusterApiUrl('mainnet-beta'),
+        'confirmed'
+      );
+    }
     
-    const amount = p.price;
+    const lamports = Math.round(p.price * solanaWeb3.LAMPORTS_PER_SOL);
     toast('Preparing transaction…');
-    const lamports = Math.round(amount * solanaWeb3.LAMPORTS_PER_SOL);
-    const tx = new solanaWeb3.Transaction().add(
+
+    const { blockhash } = await connection.getLatestBlockhash('finalized');
+
+    const tx = new solanaWeb3.Transaction({
+      feePayer: walletPubkey,
+      recentBlockhash: blockhash
+    }).add(
       solanaWeb3.SystemProgram.transfer({
         fromPubkey: walletPubkey,
         toPubkey: new solanaWeb3.PublicKey(RECIPIENT),
         lamports
       })
     );
-    tx.feePayer = walletPubkey;
-    const latest = await connection.getLatestBlockhash('finalized');
-    tx.recentBlockhash = latest.blockhash;
+
     toast('Waiting for signature…');
-    const signed = await provider.signTransaction(tx);
-    const sig = await connection.sendRawTransaction(signed.serialize());
+
+    // prompts Phantom and sends
+    const { signature } = await provider.signAndSendTransaction(tx);
+
     toast('Confirming (finalized)…');
-    await connection.confirmTransaction({ signature: sig }, 'finalized');
-    savePurchase(id, sig, brief, contact);
-    openModal(id, true, sig);
+    await connection.confirmTransaction({ signature }, 'finalized');
+
+    savePurchase(id, signature, brief, contact);
+    openModal(id, true, signature);
     toast('Unlocked ✅');
   } catch(e) {
     console.error('Payment error:', e);
-    toast('Payment failed or cancelled');
+    toast(e && e.message ? e.message : 'Payment failed or cancelled');
   }
 }
 
