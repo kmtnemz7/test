@@ -35,6 +35,33 @@ const $$ = (s)=>Array.from(document.querySelectorAll(s));
 const toast=(m)=>{const t=$('#toast'); t.textContent=m; t.setAttribute('role', 'alert'); t.style.display='block'; setTimeout(()=>t.classList.add('active'), 10); setTimeout(()=>{t.classList.remove('active'); setTimeout(()=>t.style.display='none', 300);}, 1800);};
 const priceLabel=(n)=> (n<=0? 'FREE' : (Math.round(n*100)/100).toFixed(2)+' SOL');
 
+// ---- Reliable RPC init ----
+const RPC_CANDIDATES = [
+  (window.PF_RPC || '').trim(),
+  (localStorage.getItem('pf_rpc') || '').trim(),
+  'https://rpc.ankr.com/solana',
+  'https://api.mainnet-beta.solana.com'
+].filter(Boolean);
+
+async function ensureConnection() {
+  if (connection) return connection;
+  if (!window.solanaWeb3) throw new Error('SDK not loaded');
+
+  let lastErr;
+  for (const url of RPC_CANDIDATES) {
+    try {
+      const c = new solanaWeb3.Connection(url, 'confirmed');
+      await c.getLatestBlockhash('finalized');
+      connection = c;
+      return connection;
+    } catch (e) {
+      lastErr = e;
+      console.warn('[RPC fail]', url, e?.message || e);
+    }
+  }
+  throw new Error('All RPC endpoints rejected. Set a custom RPC via localStorage.setItem("pf_rpc","https://YOUR_RPC...")');
+}
+
 // ---- Router ----
 const routes = {
   '': 'home',
@@ -461,14 +488,8 @@ async function buyPrompt(id){
       walletPubkey = resp.publicKey;
     }
 
-    // connection lazy-init (in case it wasn't set on load)
-    if (!connection) {
-      if (!window.solanaWeb3) throw new Error('SDK not loaded');
-      connection = new solanaWeb3.Connection(
-        solanaWeb3.clusterApiUrl('mainnet-beta'),
-        'confirmed'
-      );
-    }
+    // ensure working RPC
+    await ensureConnection();
     
     const lamports = Math.round(p.price * solanaWeb3.LAMPORTS_PER_SOL);
     toast('Preparing transaction…');
@@ -548,11 +569,11 @@ function setupEventHandlers() {
 window.addEventListener('load', async () => {
   try { 
     if (window.solanaWeb3) {
-      connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed'); 
+      await ensureConnection();
     }
   } catch(e){ 
     console.error('Solana connection failed:', e); 
-    toast('Failed to init Solana SDK'); 
+    toast(e.message || 'Failed to init Solana SDK'); 
   }
 
   dropdown('cat', [['__all','All'], ['Design','Design'], ['Marketing','Marketing'], ['Crypto','Crypto'], ['Content','Content']]);
