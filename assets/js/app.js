@@ -36,45 +36,35 @@ const toast=(m)=>{const t=$('#toast'); t.textContent=m; t.setAttribute('role', '
 const priceLabel=(n)=> (n<=0? 'FREE' : (Math.round(n*100)/100).toFixed(2)+' SOL');
 
 // ---- Reliable RPC init ----
-// NEW: allow ?pf_rpc=... to set the RPC quickly
-(() => {
-  try {
-    const qp = new URLSearchParams(location.search).get('pf_rpc');
-    if (qp) localStorage.setItem('pf_rpc', qp);
-  } catch {}
-})();
+const PF_DEFAULT_RPC = "https://solana-mainnet.g.alchemy.com/v2/iI04YgCUWx3MQxT-Z0B1m";
 
+// Only use your Alchemy URL, with optional localStorage override
 const RPC_CANDIDATES = [
-  (window.PF_RPC || '').trim(),
-  (localStorage.getItem('pf_rpc') || '').trim(),
-  'https://rpc.ankr.com/solana',
-  'https://api.mainnet-beta.solana.com'
+  (localStorage.getItem('pf_rpc') || PF_DEFAULT_RPC).trim()
 ].filter(Boolean);
 
 async function ensureConnection() {
   if (connection) return connection;
   if (!window.solanaWeb3) throw new Error('SDK not loaded');
 
-  let lastErr, lastUrl;
+  let lastErr;
   for (const url of RPC_CANDIDATES) {
     try {
       const c = new solanaWeb3.Connection(url, 'confirmed');
       await c.getLatestBlockhash('finalized');
       connection = c;
-      console.log('Connected via RPC:', url); // NEW: log winner
       return connection;
     } catch (e) {
       lastErr = e;
-      lastUrl = url;
       console.warn('[RPC fail]', url, e?.message || e);
     }
   }
-  // NEW: clearer error with last URL and provider message
   throw new Error(
-    `All RPC endpoints rejected. Last tried: ${lastUrl || 'n/a'}. ` +
-    `Set localStorage.setItem("pf_rpc","https://solana-mainnet.g.alchemy.com/v2/YOUR_KEY") — provider said: ${lastErr?.message || lastErr}`
+    `All RPC endpoints rejected. Last tried: ${RPC_CANDIDATES.at(-1)}. ` +
+    `Set localStorage.setItem("pf_rpc","${PF_DEFAULT_RPC}") — provider said: ${lastErr?.message || lastErr}`
   );
 }
+
 
 // ---- Router ----
 const routes = {
