@@ -589,7 +589,7 @@ async function buyPrompt(id){
       const balance = await connection.getBalance(walletPubkey);
       const requiredBalance = lamports + 5000; // Add fee buffer
       if (balance < requiredBalance) {
-        toast(`Insufficient $PROMPTFI. Need ${(requiredBalance/solanaWeb3.LAMPORTS_PER_SOL).toFixed(2)} SOL value.`);
+        toast(`Insufficient $PROMPTFI. Need ${(requiredBalance/solanaWeb3.LAMPORTS_PER_SOL).toFixed(2)} SOL worth.`);
         return;
       }
     } catch (balanceError) {
