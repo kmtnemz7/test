@@ -10,8 +10,14 @@
 * {
   box-sizing: border-box
 }
-html,
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
 body {
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0;
   background:
@@ -21,6 +27,10 @@ body {
     linear-gradient(180deg, #05070c 0%, #060811 100%);
   color: var(--txt);
   font-family: Poppins, Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+#main-content {
+  flex: 1;
 }
 a {
   color: inherit;
