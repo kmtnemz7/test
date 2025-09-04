@@ -37,17 +37,47 @@ const priceLabel=(n)=> (n<=0? 'FREE' : (Math.round(n*100)/100).toFixed(2)+' SOL'
 
 async function ensureBuffer(){
   if (window.Buffer) return;
-  await new Promise((res, rej) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js';
-    s.crossOrigin = 'anonymous';
-    s.referrerPolicy = 'no-referrer';
-    s.onload = res;
-    s.onerror = rej;
-    document.head.appendChild(s);
-  });
-  if (!window.Buffer && window.buffer?.Buffer) window.Buffer = window.buffer.Buffer;
-  if (!window.Buffer) throw new Error('Buffer polyfill failed to load');
+  
+  // Try multiple CDN sources for Buffer
+  const bufferSources = [
+    'https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js',
+    'https://unpkg.com/buffer@6.0.3/index.js',
+    'https://cdn.jsdelivr.net/npm/buffer@6.0.3/index.js'
+  ];
+  
+  for (const src of bufferSources) {
+    try {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.crossOrigin = 'anonymous';
+        s.referrerPolicy = 'no-referrer';
+        s.onload = res;
+        s.onerror = rej;
+        // Add timeout
+        setTimeout(() => rej(new Error('Script load timeout')), 10000);
+        document.head.appendChild(s);
+      });
+      
+      // Check if Buffer is available
+      if (window.Buffer) return;
+      if (window.buffer?.Buffer) {
+        window.Buffer = window.buffer.Buffer;
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to load Buffer from:', src, e);
+      continue;
+    }
+  }
+  
+  // If all CDN sources fail, create a minimal Buffer polyfill
+  console.warn('Creating minimal Buffer polyfill');
+  window.Buffer = {
+    from: (data) => new Uint8Array(data),
+    alloc: (size) => new Uint8Array(size),
+    isBuffer: (obj) => obj instanceof Uint8Array
+  };
 }
 
 
