@@ -36,6 +36,14 @@ const toast=(m)=>{const t=$('#toast'); t.textContent=m; t.setAttribute('role', '
 const priceLabel=(n)=> (n<=0? 'FREE' : (Math.round(n*100)/100).toFixed(2)+' SOL');
 
 // ---- Reliable RPC init ----
+// NEW: allow ?pf_rpc=... to set the RPC quickly
+(() => {
+  try {
+    const qp = new URLSearchParams(location.search).get('pf_rpc');
+    if (qp) localStorage.setItem('pf_rpc', qp);
+  } catch {}
+})();
+
 const RPC_CANDIDATES = [
   (window.PF_RPC || '').trim(),
   (localStorage.getItem('pf_rpc') || '').trim(),
@@ -47,19 +55,25 @@ async function ensureConnection() {
   if (connection) return connection;
   if (!window.solanaWeb3) throw new Error('SDK not loaded');
 
-  let lastErr;
+  let lastErr, lastUrl;
   for (const url of RPC_CANDIDATES) {
     try {
       const c = new solanaWeb3.Connection(url, 'confirmed');
       await c.getLatestBlockhash('finalized');
       connection = c;
+      console.log('Connected via RPC:', url); // NEW: log winner
       return connection;
     } catch (e) {
       lastErr = e;
+      lastUrl = url;
       console.warn('[RPC fail]', url, e?.message || e);
     }
   }
-  throw new Error('All RPC endpoints rejected. Set a custom RPC via localStorage.setItem("pf_rpc","https://solana-mainnet.g.alchemy.com/v2/iI04YgCUWx3MQxT-Z0B1m")');
+  // NEW: clearer error with last URL and provider message
+  throw new Error(
+    `All RPC endpoints rejected. Last tried: ${lastUrl || 'n/a'}. ` +
+    `Set localStorage.setItem("pf_rpc","https://solana-mainnet.g.alchemy.com/v2/YOUR_KEY") — provider said: ${lastErr?.message || lastErr}`
+  );
 }
 
 // ---- Router ----
@@ -99,23 +113,12 @@ function hideAllSections() {
 function showRoute(route) {
   hideAllSections();
   currentRoute = route;
-  
   switch(route) {
-    case 'home':
-      showHome();
-      break;
-    case 'explore':
-      showExplore(); 
-      break;
-    case 'creators':
-      showCreators();
-      break;
-    case 'purchases':
-      showPurchases();
-      break;
-    default:
-      showHome();
-      break;
+    case 'home':      showHome(); break;
+    case 'explore':   showExplore(); break;
+    case 'creators':  showCreators(); break;
+    case 'purchases': showPurchases(); break;
+    default:          showHome(); break;
   }
 }
 
@@ -129,10 +132,8 @@ function showHome() {
 function showExplore() {
   const filtersSection = $('.filters');
   const marketSection = $('#market');
-  
   if (filtersSection) filtersSection.style.display = 'block';
   if (marketSection) marketSection.style.display = 'block';
-  
   renderGrid(DATA);
   applyFilters();
 }
@@ -152,22 +153,18 @@ function showPurchases() {
 function initDropdownMenu() {
   const menuTrigger = $('#menu-trigger');
   const menuDropdown = $('#menu-dropdown');
-  
   if (!menuTrigger || !menuDropdown) return;
-  
+
   let isOpen = false;
-  
   function openMenu() {
     if (isOpen) return;
     isOpen = true;
     menuDropdown.style.display = 'block';
     setTimeout(() => menuDropdown.classList.add('active'), 10);
     menuTrigger.setAttribute('aria-expanded', 'true');
-    
     const firstItem = menuDropdown.querySelector('a');
     if (firstItem) firstItem.focus();
   }
-  
   function closeMenu() {
     if (!isOpen) return;
     isOpen = false;
@@ -176,59 +173,40 @@ function initDropdownMenu() {
     menuTrigger.setAttribute('aria-expanded', 'false');
     menuTrigger.focus();
   }
-  
   menuTrigger.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOpen) closeMenu();
     else openMenu();
   });
-  
   menuDropdown.addEventListener('click', (e) => {
     if (e.target.tagName === 'A') {
       e.preventDefault();
       const href = e.target.getAttribute('href');
-      if (href && href.startsWith('#')) {
-        navigateTo(href.slice(1));
-      }
+      if (href && href.startsWith('#')) navigateTo(href.slice(1));
       closeMenu();
     }
   });
-  
   document.addEventListener('click', (e) => {
-    if (isOpen && !menuTrigger.contains(e.target) && !menuDropdown.contains(e.target)) {
-      closeMenu();
-    }
+    if (isOpen && !menuTrigger.contains(e.target) && !menuDropdown.contains(e.target)) closeMenu();
   });
-  
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isOpen) {
-      e.preventDefault();
-      closeMenu();
-    }
+    if (e.key === 'Escape' && isOpen) { e.preventDefault(); closeMenu(); }
   });
-  
   menuDropdown.addEventListener('keydown', (e) => {
     const items = Array.from(menuDropdown.querySelectorAll('a'));
     const currentIndex = items.indexOf(document.activeElement);
-    
     switch(e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
-        items[nextIndex].focus();
+        items[(currentIndex < items.length - 1 ? currentIndex + 1 : 0)].focus();
         break;
       case 'ArrowUp':
         e.preventDefault(); 
-        const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
-        items[prevIndex].focus();
+        items[(currentIndex > 0 ? currentIndex - 1 : items.length - 1)].focus();
         break;
       case 'Tab':
-        if (e.shiftKey && currentIndex === 0) {
-          closeMenu();
-        } else if (!e.shiftKey && currentIndex === items.length - 1) {
-          closeMenu();
-        }
+        if ((e.shiftKey && currentIndex === 0) || (!e.shiftKey && currentIndex === items.length - 1)) closeMenu();
         break;
     }
   });
@@ -253,10 +231,8 @@ const card=(p)=>`
 function renderGrid(list){
   const grid = $('#grid'); 
   if (!grid) return;
-  
   const skeleton = $('#skeleton');
   if (skeleton) skeleton.style.display = 'none';
-  
   grid.innerHTML = list.map(card).join('');
   $$('[data-view]').forEach(b=>b.addEventListener('click', ()=>openModal(b.getAttribute('data-view'))));
   $$('[data-buy]').forEach(b=>b.addEventListener('click', ()=>buyPrompt(b.getAttribute('data-buy'))));
@@ -266,19 +242,17 @@ function applyFilters(){
   const q = $('#q');
   const catVal = $('#cat_val');
   const sortVal = $('#sort_val');
-  
   if (!q || !catVal || !sortVal) return;
-  
+
   const query = q.value.toLowerCase().trim();
   const cat = catVal.dataset.value || '';
   const sort = sortVal.dataset.value || 'default';
-  
+
   let list = DATA.filter(p => {
     const hay = (p.title+' '+p.cat).toLowerCase();
     if (cat && p.cat!==cat) return false;
     return !query || hay.includes(query);
   });
-  
   if (sort === 'priceAsc') list.sort((a,b)=>a.price-b.price);
   if (sort === 'priceDesc') list.sort((a,b)=>b.price-a.price);
   if (sort === 'alpha') list.sort((a,b)=>a.title.localeCompare(b.title));
@@ -295,15 +269,10 @@ function dropdown(rootId, items){
   const menu = root.querySelector('.menu');
   if (!summary || !val || !menu) return;
 
-  // build options as real buttons
   menu.innerHTML = items.map(([k,t]) => `<button type="button" data-k="${k}">${t}</button>`).join('');
 
   let fromMenu = false;
-
-  // keep menu open during option press, and ensure the event doesn't bubble up
   menu.addEventListener('pointerdown', (e) => { fromMenu = true; e.stopPropagation(); });
-
-  // take over details toggle; block native summary toggle
   summary.addEventListener('pointerdown', (e) => e.preventDefault());
   summary.addEventListener('click', (e) => {
     e.preventDefault();
@@ -311,7 +280,6 @@ function dropdown(rootId, items){
     root.toggleAttribute('open');
   });
 
-  // robust option selection
   menu.addEventListener('click', (e) => {
     e.stopPropagation();
     const btn = e.target.closest('button[data-k]');
@@ -327,12 +295,10 @@ function dropdown(rootId, items){
     applyFilters();
   });
 
-  // outside click closes
   document.addEventListener('pointerdown', (e) => {
     if (!root.contains(e.target)) root.removeAttribute('open');
   });
 }
-
 
 // ---- Modal Functions ----
 function openModal(id, unlocked=false, sig=null){
@@ -343,17 +309,15 @@ function openModal(id, unlocked=false, sig=null){
   const copyBtn = $('#copyBtn');
   const txLink = $('#txLink');
   const modal = $('#modal');
-  
   if (!mTitle || !mMeta || !mText || !modal) return;
-  
+
   mTitle.textContent = p.title + (unlocked ? ' — Unlocked' : ' — Preview');
   mMeta.textContent = `${p.cat} • ${p.model} • ${p.lang} — ${priceLabel(p.price)}`;
-  
+
   const owned = localStorage.getItem('pf_owned_'+id)==='1' || unlocked;
   const brief = $('#uBrief')?.value?.trim() || '';
-  
   mText.textContent = owned ? p.full : (brief ? (`Preview with your brief: `+brief.slice(0,160)+'…') : p.preview);
-  
+
   if (copyBtn) copyBtn.classList.toggle('hidden', !owned);
   if (txLink) {
     if (sig) {
@@ -363,10 +327,10 @@ function openModal(id, unlocked=false, sig=null){
       txLink.classList.add('hidden');
     }
   }
-  
+
   modal.style.display = 'flex';
   setTimeout(() => modal.classList.add('active'), 10);
-  
+
   const buyNow = $('#buyNow');
   if (buyNow) {
     buyNow.textContent = p.price<=0? 'Get Free' : 'Buy & Unlock';
@@ -396,10 +360,10 @@ function savePurchase(id, sig, brief, contact){
 function renderPurchases(){
   const box = $('#purchasesList');
   if (!box) return;
-  
+
   const list = JSON.parse(localStorage.getItem('pf_purchases')||'[]');
   if (!list.length) { box.textContent = 'No purchases yet.'; return; }
-  
+
   box.innerHTML = list.map(r => {
     const p = DATA.find(x=>x.id===r.id);
     const title = p? p.title : r.id;
@@ -414,7 +378,7 @@ function renderPurchases(){
         </div>
       </div>`;
   }).join('');
-  
+
   $$('[data-reopen]').forEach(b=>b.addEventListener('click', ()=>openModal(b.getAttribute('data-reopen'), true)));
 }
 
@@ -464,12 +428,12 @@ async function buyPrompt(id){
   try {
     const p = DATA.find(x=>x.id===id);
     if (!p) return;
-    
+
     const briefEl = $('#uBrief');
     const contactEl = $('#uContact');
     const brief = briefEl?.value?.trim() || '';
     const contact = contactEl?.value?.trim() || '';
-    
+
     if (brief.length < 3) return toast('Please enter a short brief.');
     if (!contact) return toast('Add your contact (email or Telegram).');
 
@@ -490,7 +454,7 @@ async function buyPrompt(id){
 
     // ensure working RPC
     await ensureConnection();
-    
+
     const lamports = Math.round(p.price * solanaWeb3.LAMPORTS_PER_SOL);
     toast('Preparing transaction…');
 
@@ -536,7 +500,7 @@ function setupEventHandlers() {
       }
     };
   }
-  
+
   window.closeModal = () => { 
     const modal = $('#modal');
     if (modal) {
@@ -544,13 +508,13 @@ function setupEventHandlers() {
       setTimeout(() => modal.style.display = 'none', 400);
     }
   };
-  
+
   const walletBtn = $('#walletBtn');
   if (walletBtn) walletBtn.onclick = toggleWallet;
-  
+
   const searchInput = $('#q');
   if (searchInput) searchInput.addEventListener('input', applyFilters);
-  
+
   document.addEventListener('click', (e) => {
     if (e.target.tagName === 'A' && e.target.getAttribute('href')?.startsWith('#')) {
       e.preventDefault();
@@ -558,7 +522,7 @@ function setupEventHandlers() {
       navigateTo(href);
     }
   });
-  
+
   window.addEventListener('hashchange', () => {
     const route = getRoute();
     showRoute(route);
@@ -581,10 +545,10 @@ window.addEventListener('load', async () => {
 
   setupEventHandlers();
   initDropdownMenu();
-  
+
   const initialRoute = getRoute();
   showRoute(initialRoute);
-  
+
   renderPurchases();
 });
 
