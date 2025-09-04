@@ -59,7 +59,7 @@ async function ensureConnection() {
       console.warn('[RPC fail]', url, e?.message || e);
     }
   }
-  throw new Error('All RPC endpoints rejected. Set a custom RPC via localStorage.setItem("pf_rpc","https://YOUR_RPC...")');
+  throw new Error('All RPC endpoints rejected. Set a custom RPC via localStorage.setItem("pf_rpc","https://solana-mainnet.g.alchemy.com/v2/iI04YgCUWx3MQxT-Z0B1m")');
 }
 
 // ---- Router ----
