@@ -671,23 +671,134 @@ footer {
   }
 }
 @media (max-width: 420px) {
+  /* Compact navigation */
   .navbar {
-    height: 56px
+    height: 52px;
+    padding: 0 8px;
   }
+  
+  .brand {
+    font-size: 18px;
+  }
+  
   .nav-actions {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  
+  .nav-actions::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .nav-actions .btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+    min-width: max-content;
+  }
+  
+  /* Typography for small screens */
+  h1 {
+    font-size: clamp(24px, 8vw, 32px);
+  }
+  
+  /* Container padding */
+  .container {
+    padding: 0 12px;
+  }
+  
+  /* Grid layouts */
   .filters .grid {
-    grid-template-columns: 1fr 1fr
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
+  
+  .grid {
+    gap: 12px;
+  }
+  
+  /* Roadmap mobile optimization */
+  .roadmap-timeline {
+    padding: 0 4px;
+  }
+  
+  .phase-header {
+    padding: 14px 16px 8px;
+  }
+  
+  .phase-header h3 {
+    font-size: 16px;
+  }
+  
+  .phase-content {
+    padding: 14px 16px;
+  }
+  
+  .phase-content li {
+    font-size: 13px;
+    padding-left: 16px;
+  }
+  
+  .targets {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  
+  /* Dropdown mobile optimization */
   #menu-dropdown {
-    right: -16px;
-    min-width: 140px;
+    right: -8px;
+    left: -8px;
+    min-width: auto;
+    max-width: none;
+    width: calc(100vw - 32px);
   }
+  
+  .menu {
+    max-height: 200px;
+  }
+  
+  .menu button {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  
+  /* Modal mobile optimization */
+  .modal,
+  .purchase-options-modal {
+    padding: 8px;
+  }
+  
+  .modal .box,
   .purchase-options-box {
-    margin: 16px;
+    margin: 0;
+    padding: 18px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  /* Toast mobile positioning */
+  .toast {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    max-width: none;
+    text-align: center;
+  }
+  
+  /* Button improvements for touch */
+  .btn {
+    min-height: 44px; /* iOS recommended touch target */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Card touch optimization */
+  .card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
   }
 }
 .page-loader {
@@ -754,4 +865,85 @@ footer {
     font-size: clamp(12px, 3.8vw, 14px);
   }
   footer .container > span{order:2; text-align:center; opacity:.75}
+}
+/* Extra small screens */
+@media (max-width: 360px) {
+  .container {
+    padding: 0 8px;
+  }
+  
+  .navbar {
+    padding: 0 4px;
+  }
+  
+  .phase-header,
+  .phase-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  .nav-actions .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .purchase-options-box {
+    padding: 16px;
+  }
+}
+
+/* Large screens optimization */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1200px;
+  }
+  
+  .roadmap-timeline {
+    max-width: 1000px;
+  }
+  
+  .modal .box {
+    max-width: 800px;
+  }
+  
+  .purchase-options-box {
+    max-width: 550px;
+  }
+  
+  /* Enhanced hover effects on larger screens */
+  .card:hover {
+    transform: translateY(-4px) translateZ(0);
+  }
+  
+  .btn:hover {
+    transform: translateY(-2px) translateZ(0);
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Optimize for retina displays */
+  .spinner {
+    border-width: 2px;
+  }
+  
+  .phase-header::before {
+    height: 2px;
+  }
+}
+
+/* Landscape mobile orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-art {
+    min-height: 140px;
+  }
+  
+  .modal .box,
+  .purchase-options-box {
+    max-height: 80vh;
+  }
+  
+  .menu {
+    max-height: 180px;
+  }
 }
