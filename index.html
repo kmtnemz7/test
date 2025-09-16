@@ -15,6 +15,7 @@
     <div id="pageLoader" class="page-loader" aria-hidden="true">
       <div class="spinner"></div>
     </div>
+    
     <nav>
       <style>
         .ticker {
@@ -53,9 +54,7 @@
       </style>
 
       <div class="container navbar">
-        <a href="#" class="brand">PromptFi</a>
-
-        <!-- Live token ticker -->
+        <a href="index.html" class="brand">PromptFi</a>
 
         <div class="nav-actions">
           <div class="dropdown-container" style="position: relative;">
@@ -63,9 +62,9 @@
               Menu ▾
             </button>
             <div id="menu-dropdown" class="menu" style="display: none; position: absolute; top: calc(100% + 6px); right: 0; min-width: 160px; z-index: 1200;">
-              <a href="#explore">Explore</a>
-              <a href="#creators">Creators</a>
-              <a href="#purchases">My Purchases</a>
+              <a href="explore.html">Explore</a>
+              <a href="creators.html">Creators</a>
+              <a href="purchases.html">My Purchases</a>
             </div>
           </div>
           <button id="walletBtn" class="btn glow" style="padding: 12px 18px; border-radius: 14px;">Connect Wallet</button>
@@ -78,6 +77,7 @@
           const API  = `https://api.dexscreener.com/latest/dex/tokens/${TOKEN}`;
 
           const $ticker   = document.getElementById('token-ticker');
+          if (!$ticker) return;
           const $priceBtn = $ticker.querySelector('[data-view="price"]');
           const $mcBtn    = $ticker.querySelector('[data-view="mc"]');
 
@@ -108,8 +108,8 @@
           }
 
           function render(){
-            $priceBtn.textContent = fmtUsd(last.priceUsd);
-            $mcBtn.textContent    = `MC ${fmtUsd(last.marketCap)}`;
+            if ($priceBtn) $priceBtn.textContent = fmtUsd(last.priceUsd);
+            if ($mcBtn) $mcBtn.textContent    = `MC ${fmtUsd(last.marketCap)}`;
           }
 
           $ticker.addEventListener('click', (e) => {
@@ -126,7 +126,7 @@
     </nav>
 
     <div id="main-content">
-      <section id="home" class="hero" style="display: block;">
+      <section id="home" class="hero">
         <div class="hero-bg"></div>
         <div class="container" style="padding:48px 0">
           <div class="grid grid-2">
@@ -135,7 +135,7 @@
               <h1>Turn Your AI Prompts Into Crypto Assets</h1>
               <p class="muted">Buy high-quality prompts with $PROMPTFI. Unlock instantly after confirmed payment.</p>
               <div style="display:flex;gap:12px;margin-top:16px">
-                <a href="#explore" class="btn glow">Explore Prompts</a>
+                <a href="explore.html" class="btn glow">Explore Prompts</a>
                 <a href="#how" class="btn">How it works</a>
               </div>
             </div>
@@ -146,7 +146,7 @@
         </div>
       </section>
 
-      <section id="how" class="container" style="padding-bottom:20px; display:block;">
+      <section id="how" class="container" style="padding-bottom:20px;">
         <h2>How to Buy</h2>
         <div class="grid grid-3">
           <div class="card card-body">
@@ -169,13 +169,13 @@
             <h3>3) Unlock</h3>
             <ul class="muted" style="display:grid; row-gap:12px;">
               <li>After final on-chain confirmation (a few seconds), the prompt <strong>decrypts and appears</strong>.</li>
-              <li>It's saved under <strong>My Purchases</strong> at <code>/purchases</code> for future access.</li>
+              <li>It's saved under <strong>My Purchases</strong> at <code>purchases.html</code> for future access.</li>
               <li>If it doesn't appear instantly, refresh or reconnect your wallet—the purchase is tied to your address.</li>
             </ul>
           </div>
         </div>
 
-        <section id="roadmap" class="container" style="padding-bottom:40px; display:block;">
+        <section id="roadmap" class="container" style="padding-bottom:40px;">
           <h2 style="text-align: center; margin-bottom: 32px; font-size: 32px; background: linear-gradient(90deg, var(--g1), var(--g2), var(--g3)); -webkit-background-clip: text; background-clip: text; color: transparent;">ROADMAP</h2>
 
           <div class="roadmap-timeline">
@@ -187,7 +187,7 @@
               </div>
               <div class="phase-content">
                 <ul>
-                  <li>Launch <strong>next-generation marketplace architecture</strong> with streamlined discovery via <strong>/explore</strong>, <strong>/creators</strong>, and <strong>/purchases</strong> portals</li>
+                  <li>Launch <strong>next-generation marketplace architecture</strong> with streamlined discovery via <strong>explore.html</strong>, <strong>creators.html</strong>, and <strong>purchases.html</strong> portals</li>
                   <li>Deploy <strong>$PROMPTFI native token economy</strong>: seamless token transactions → Phantom integration → <strong>sub-second decryption</strong> → permanent access via <strong>My Purchases</strong></li>
                   <li>Enterprise-grade <strong>security infrastructure</strong>: military-grade encryption, comprehensive error handling, advanced analytics and real-time monitoring</li>
                   <li><strong>Token Launch:</strong> Fair distribution, liquidity pools, staking mechanisms, and governance framework activation</li>
@@ -296,98 +296,18 @@
           </div>
         </section>
       </section>
-
-      <div class="toast" id="toast"></div>
-
-      <section id="market" class="container" style="padding:20px 0 8px; display:none;">
-        <div class="kv" style="margin-bottom:8px">
-          <h2>Marketplace</h2>
-          <div id="addr" class="badge">Wallet: not connected</div>
-        </div>
-
-        <section class="container filters" style="margin-top:12px;overflow:visible; display:none;">
-          <div class="card card-body" style="overflow:visible">
-            <div class="grid" style="grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:end;overflow:visible">
-              <label>Search<input id="q" class="input" placeholder="Search title or category"/></label>
-              <details id="cat" class="select">
-                <summary class="input trigger"><span>Category</span><span id="cat_val" class="value" data-value="">All</span></summary>
-                <div class="menu"></div>
-              </details>
-              <details id="sort" class="select">
-                <summary class="input trigger"><span>Sort</span><span id="sort_val" class="value" data-value="default">Default</span></summary>
-                <div class="menu"></div>
-              </details>
-            </div>
-          </div>
-        </section>
-
-        <div id="skeleton" class="grid grid-3">
-          <div class="skel"></div><div class="skel"></div><div class="skel"></div>
-        </div>
-        <div id="grid" class="grid grid-3" style="margin-top:12px"></div>
-      </section>
-
-      <section id="creators" class="container" style="padding-bottom:20px; display:none;">
-        <h2>Creators (coming soon)</h2>
-        <div class="card card-body">
-          <p class="muted" style="margin-top:0">
-            PromptFi will let creators list prompts, set $PROMPTFI pricing, and get paid non‑custodially. Listings will be stored on IPFS with on‑chain receipts. Join the waitlist and be first to sell.
-          </p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input id="wlEmail" class="input" placeholder="Email or Telegram"/>
-            <button class="btn glow" onclick="localStorage.setItem('pf_waitlist', (localStorage.getItem('pf_waitlist')||'') + '\n' + document.getElementById('wlEmail').value); this.textContent='Joined ✓';">Join Waitlist</button>
-          </div>
-        </div>
-      </section>
-
-      <section id="purchases" class="container" style="padding-bottom:24px; display:none;">
-        <h2>My Purchases</h2>
-        <div id="purchasesList" class="card card-body">No purchases yet.</div>
-      </section>
     </div>
 
     <footer>
       <div class="container" style="display:flex;align-items:center;justify-content:space-between">
         <span>© 2025 PromptFi</span>
         <div style="display:flex;gap:12px">
-          <a href="#explore">Marketplace</a>
-          <a href="#purchases">My Purchases</a>
+          <a href="explore.html">Marketplace</a>
+          <a href="purchases.html">My Purchases</a>
           <a href="#how">How it works</a>
         </div>
       </div>
     </footer>
-
-    <!-- Modal -->
-    <div id="modal" class="modal">
-      <div class="box">
-        <div class="kv">
-          <h3 id="mTitle" style="margin:0">Prompt</h3>
-          <button class="btn" onclick="closeModal()">✕</button>
-        </div>
-        <p id="mMeta" class="muted" style="margin:6px 0 0"></p>
-
-        <div class="card" style="margin-top:12px">
-          <div class="card-body">
-            <label>Brief (what do you need?)<textarea id="uBrief" class="input" rows="3" placeholder="Describe what you need (topic, tone, goal)…"></textarea></label>
-            <div class="grid" style="grid-template-columns:3fr 1fr;gap:10px;margin-top:10px">
-              <input id="uContact" class="input" placeholder="Your contact (email or Telegram)"/>
-              <button id="buyNow" class="btn glow">Buy & Unlock</button>
-            </div>
-          </div>
-        </div>
-
-        <div style="height:160px;border:1px solid var(--b);border-radius:12px;margin-top:12px;background:
-          radial-gradient(90px 90px at 20% 30%, rgba(168,85,247,.25), transparent 60%),
-          radial-gradient(90px 90px at 80% 40%, rgba(6,182,212,.25), transparent 60%);padding:12px;overflow:auto;">
-          <p id="mText" style="margin:0;"></p>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <a id="txLink" target="_blank" class="btn hidden">View on Solscan</a>
-          <button id="copyBtn" class="btn hidden">Copy Prompt</button>
-        </div>
-      </div>
-    </div>
 
     <script defer src="assets/js/app.js?v=1756220420"></script>
   </body>
