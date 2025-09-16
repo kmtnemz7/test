@@ -42,7 +42,7 @@ a {
   padding: 0 16px
 }
 nav {
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 70;
   background: rgba(8, 10, 18, .6);
