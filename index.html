@@ -9,6 +9,70 @@
     <link rel="manifest" href="manifest.json"/>
     <link rel="icon" href="assets/img/favicon.png" type="image/png"/>
     <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js" defer></script>
+    <style>
+      .ticker {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+      }
+      .t-tab {
+        font: 600 14px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--b, #334155);
+        background: var(--bg-2, #1a2332);
+        color: var(--fg, #fff);
+        cursor: pointer;
+        opacity: 0.85;
+        transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      }
+      .t-tab:hover {
+        transform: translateY(-1px);
+        border-color: var(--acc1, #3b82f6);
+      }
+      @media (max-width:900px) {
+        .ticker {
+          gap: 4px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .t-tab {
+          font-size: 12px;
+          padding: 6px 8px;
+        }
+      }
+      /* Roadmap title border style */
+      .roadmap-title-border {
+        border: 2px solid var(--g2, #a855f7);
+        border-radius: 12px;
+        padding: 20px 0;
+        text-align: center;
+        max-width: 600px;
+        margin: 64px auto 24px auto;  /* 64px top margin for extra space under "How to Buy" */
+        box-shadow: 0 0 20px rgba(0,0,0,0.15);
+        background: transparent;
+      }
+      .roadmap-title-border h2 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        background: linear-gradient(90deg, var(--g1, #3b82f6), var(--g2, #a855f7), var(--g3, #06b6d4));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      @media (max-width: 700px) {
+        .roadmap-title-border {
+          padding: 16px 0;
+          margin: 48px auto 18px auto;
+        }
+        .roadmap-title-border h2 {
+          font-size: 24px;
+        }
+      }
+    </style>
   </head>
   <body>
     <noscript><style>#pageLoader{display:none}</style></noscript>
@@ -16,62 +80,6 @@
       <div class="spinner"></div>
     </div>
     <nav>
-      <style>
-        .ticker {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto;
-        }
-        .t-tab {
-          font: 600 14px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial;
-          padding: 8px 12px;
-          border-radius: 999px;
-          border: 1px solid var(--b, #334155);
-          background: var(--bg-2, #1a2332);
-          color: var(--fg, #fff);
-          cursor: pointer;
-          opacity: 0.85;
-          transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-        }
-        .t-tab:hover {
-          transform: translateY(-1px);
-          border-color: var(--acc1, #3b82f6);
-        }
-        @media (max-width:900px) {
-          .ticker {
-            gap: 4px;
-            margin-left: auto;
-            margin-right: auto;
-          }
-          .t-tab {
-            font-size: 12px;
-            padding: 6px 8px;
-          }
-        }
-        /* Roadmap title border style */
-        .roadmap-title-border {
-          border: 2px solid var(--g2, #a855f7);
-          border-radius: 12px;
-          padding: 20px 0;
-          text-align: center;
-          max-width: 600px;
-          margin: 0 auto 24px auto;
-          box-shadow: 0 0 20px rgba(0,0,0,0.15);
-          background: transparent;
-        }
-        .roadmap-title-border h2 {
-          margin: 0;
-          font-size: 32px;
-          font-weight: 700;
-          background: linear-gradient(90deg, var(--g1, #3b82f6), var(--g2, #a855f7), var(--g3, #06b6d4));
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-        }
-      </style>
-
       <div class="container navbar">
         <a href="#" class="brand">PromptFi</a>
 
