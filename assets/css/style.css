@@ -757,7 +757,10 @@ footer {
 
   
   .menu {
-    max-height: 200px;
+    position: absolute;
+    top: 100%;       /* flow under header */
+    left: 0;
+    z-index: 9999;
   }
   
   .menu button {
