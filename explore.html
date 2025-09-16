@@ -76,58 +76,6 @@
           <button id="walletBtn" class="btn glow" style="padding: 12px 18px; border-radius: 14px;">Connect Wallet</button>
         </div>
       </div>
-
-      <script>
-        (() => {
-          const TOKEN = "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"; // fartcoin test token
-          const API  = `https://api.dexscreener.com/latest/dex/tokens/${TOKEN}`;
-
-          const $ticker   = document.getElementById('token-ticker');
-          const $priceBtn = $ticker.querySelector('[data-view="price"]');
-          const $mcBtn    = $ticker.querySelector('[data-view="mc"]');
-
-          let last = { priceUsd: null, marketCap: null };
-
-          function fmtUsd(n){
-            if (n == null) return "—";
-            const abs = Math.abs(n);
-            if (abs >= 1e9)  return `$${(n/1e9).toFixed(2)}B`;
-            if (abs >= 1e6)  return `$${(n/1e6).toFixed(2)}M`;
-            if (abs >= 1e3)  return `$${(n/1e3).toFixed(2)}K`;
-            if (abs < 0.01)  return `$${n.toFixed(6)}`;
-            return `$${n.toFixed(4)}`;
-          }
-
-          async function pull(){
-            try{
-              const r = await fetch(API, { cache: 'no-store' });
-              const j = await r.json();
-              const pair = (j.pairs || []).sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
-              if (!pair) return;
-              last.priceUsd = Number(pair.priceUsd);
-              last.marketCap = Number(pair.marketCap ?? pair.fdv);
-              render();
-            }catch(e){
-              // keep old values
-            }
-          }
-
-          function render(){
-            $priceBtn.textContent = fmtUsd(last.priceUsd);
-            $mcBtn.textContent    = `MC ${fmtUsd(last.marketCap)}`;
-          }
-
-          $ticker.addEventListener('click', (e) => {
-            const b = e.target.closest('.t-tab');
-            if (!b) return;
-            $ticker.querySelectorAll('.t-tab').forEach(x=>x.classList.remove('active'));
-            b.classList.add('active');
-          });
-
-          pull();
-          setInterval(pull, 30000);
-        })();
-      </script>
     </nav>
 
     <div id="main-content">
@@ -205,6 +153,6 @@
       </div>
     </div>
 
-    <script defer src="assets/js/app.js?v=1756220420"></script>
+    <script defer src="assets/js/app.js"></script>
   </body>
 </html>
