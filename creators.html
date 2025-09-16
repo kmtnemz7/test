@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Creators - PromptFi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css?v=1756220420"/>
+    <link rel="manifest" href="manifest.json"/>
+    <link rel="icon" href="assets/img/favicon.png" type="image/png"/>
+    <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js" defer></script>
+  </head>
+  <body>
+    <noscript><style>#pageLoader{display:none}</style></noscript>
+    <div id="pageLoader" class="page-loader" aria-hidden="true">
+      <div class="spinner"></div>
+    </div>
+    
+    <nav>
+      <style>
+        .ticker {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto;
+        }
+        .t-tab {
+          font: 600 14px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial;
+          padding: 8px 12px;
+          border-radius: 999px;
+          border: 1px solid var(--b, #334155);
+          background: var(--bg-2, #1a2332);
+          color: var(--fg, #fff);
+          cursor: pointer;
+          opacity: 0.85;
+          transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+        .t-tab:hover {
+          transform: translateY(-1px);
+          border-color: var(--acc1, #3b82f6);
+        }
+        @media (max-width:900px) {
+          .ticker {
+            gap: 4px;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          .t-tab {
+            font-size: 12px;
+            padding: 6px 8px;
+          }
+        }
+      </style>
+
+      <div class="container navbar">
+        <a href="index.html" class="brand">PromptFi</a>
+
+        <!-- Live token ticker -->
+        <div id="token-ticker" class="ticker">
+          <div class="t-tab" data-view="price">$—</div>
+          <div class="t-tab" data-view="mc">MC $—</div>
+        </div>
+
+        <div class="nav-actions">
+          <div class="dropdown-container" style="position: relative;">
+            <button id="menu-trigger" class="btn" aria-expanded="false" aria-haspopup="true">
+              Menu ▾
+            </button>
+            <div id="menu-dropdown" class="menu" style="display: none; position: absolute; top: calc(100% + 6px); right: 0; min-width: 160px; z-index: 1200;">
+              <a href="explore.html">Explore</a>
+              <a href="creators.html">Creators</a>
+              <a href="purchases.html">My Purchases</a>
+            </div>
+          </div>
+          <button id="walletBtn" class="btn glow" style="padding: 12px 18px; border-radius: 14px;">Connect Wallet</button>
+        </div>
+      </div>
+
+      <script>
+        (() => {
+          const TOKEN = "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"; // fartcoin test token
+          const API  = `https://api.dexscreener.com/latest/dex/tokens/${TOKEN}`;
+
+          const $ticker   = document.getElementById('token-ticker');
+          const $priceBtn = $ticker.querySelector('[data-view="price"]');
+          const $mcBtn    = $ticker.querySelector('[data-view="mc"]');
+
+          let last = { priceUsd: null, marketCap: null };
+
+          function fmtUsd(n){
+            if (n == null) return "—";
+            const abs = Math.abs(n);
+            if (abs >= 1e9)  return `${(n/1e9).toFixed(2)}B`;
+            if (abs >= 1e6)  return `${(n/1e6).toFixed(2)}M`;
+            if (abs >= 1e3)  return `${(n/1e3).toFixed(2)}K`;
+            if (abs < 0.01)  return `${n.toFixed(6)}`;
+            return `${n.toFixed(4)}`;
+          }
+
+          async function pull(){
+            try{
+              const r = await fetch(API, { cache: 'no-store' });
+              const j = await r.json();
+              const pair = (j.pairs || []).sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
+              if (!pair) return;
+              last.priceUsd = Number(pair.priceUsd);
+              last.marketCap = Number(pair.marketCap ?? pair.fdv);
+              render();
+            }catch(e){
+              // keep old values
+            }
+          }
+
+          function render(){
+            $priceBtn.textContent = fmtUsd(last.priceUsd);
+            $mcBtn.textContent    = `MC ${fmtUsd(last.marketCap)}`;
+          }
+
+          $ticker.addEventListener('click', (e) => {
+            const b = e.target.closest('.t-tab');
+            if (!b) return;
+            $ticker.querySelectorAll('.t-tab').forEach(x=>x.classList.remove('active'));
+            b.classList.add('active');
+          });
+
+          pull();
+          setInterval(pull, 30000);
+        })();
+      </script>
+    </nav>
+
+    <div id="main-content">
+      <section id="creators" class="container" style="padding:40px 0;">
+        <h2>Creators</h2>
+        <div class="card card-body">
+          <h3>Join the Creator Economy</h3>
+          <p class="muted" style="margin-top:0">
+            PromptFi will let creators list prompts, set $PROMPTFI pricing, and get paid non‑custodially. Listings will be stored on IPFS with on‑chain receipts. Join the waitlist and be first to sell.
+          </p>
+          
+          <div class="grid grid-2" style="margin: 24px 0; gap: 20px;">
+            <div>
+              <h4>🚀 Creator Benefits</h4>
+              <ul class="muted">
+                <li>Set your own $PROMPTFI prices</li>
+                <li>Non-custodial payments directly to your wallet</li>
+                <li>IPFS storage with on-chain verification</li>
+                <li>Earn from every prompt sale</li>
+                <li>Build your creator reputation</li>
+              </ul>
+            </div>
+            <div>
+              <h4>📋 Coming Soon</h4>
+              <ul class="muted">
+                <li>Advanced prompt editor with preview</li>
+                <li>Category tagging and SEO optimization</li>
+                <li>Creator analytics dashboard</li>
+                <li>Bulk upload tools</li>
+                <li>Revenue tracking and insights</li>
+              </ul>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap; margin-top: 20px;">
+            <input id="wlEmail" class="input" placeholder="Email or Telegram" style="flex: 1; min-width: 250px;"/>
+            <button class="btn glow" onclick="handleWaitlistSignup()">Join Creator Waitlist</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <div class="container" style="display:flex;align-items:center;justify-content:space-between">
+        <span>© 2025 PromptFi</span>
+        <div style="display:flex;gap:12px">
+          <a href="explore.html">Marketplace</a>
+          <a href="purchases.html">My Purchases</a>
+          <a href="index.html#how">How it works</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      function handleWaitlistSignup() {
+        const emailInput = document.getElementById('wlEmail');
+        const email = emailInput.value.trim();
+        
+        if (!email) {
+          alert('Please enter your email or Telegram');
+          return;
+        }
+        
+        // Store in localStorage
+        const existing = localStorage.getItem('pf_waitlist') || '';
+        localStorage.setItem('pf_waitlist', existing + '\n' + email);
+        
+        // Update button
+        event.target.textContent = 'Joined ✓';
+        event.target.disabled = true;
+        
+        // Clear input
+        emailInput.value = '';
+        
+        // Show success message
+        setTimeout(() => {
+          event.target.textContent = 'Join Creator Waitlist';
+          event.target.disabled = false;
+        }, 3000);
+      }
+    </script>
+
+    <script defer src="assets/js/app.js?v=1756220420"></script>
+  </body>
+</html>
