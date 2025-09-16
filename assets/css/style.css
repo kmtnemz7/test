@@ -268,7 +268,7 @@ nav {
   background: rgba(9, 11, 18, .98);
   border-radius: 12px;
   max-height: 260px;
-  overflow: auto;
+  overflow: visible;
   backdrop-filter: blur(8px);
   box-shadow: 0 10px 40px rgba(0, 0, 0, .3);
   opacity: 0;
@@ -516,7 +516,7 @@ footer {
   background: rgba(9, 11, 18, .98);
   border-radius: 12px;
   max-height: 260px;
-  overflow: auto;
+  overflow: visible;
   /* ensure menu sits on top and receives input */
   z-index: 10000;
   pointer-events: auto;
