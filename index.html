@@ -50,6 +50,26 @@
             padding: 6px 8px;
           }
         }
+        /* Roadmap title border style */
+        .roadmap-title-border {
+          border: 2px solid var(--g2, #a855f7);
+          border-radius: 12px;
+          padding: 20px 0;
+          text-align: center;
+          max-width: 600px;
+          margin: 0 auto 24px auto;
+          box-shadow: 0 0 20px rgba(0,0,0,0.15);
+          background: transparent;
+        }
+        .roadmap-title-border h2 {
+          margin: 0;
+          font-size: 32px;
+          font-weight: 700;
+          background: linear-gradient(90deg, var(--g1, #3b82f6), var(--g2, #a855f7), var(--g3, #06b6d4));
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
       </style>
 
       <div class="container navbar">
@@ -176,27 +196,11 @@
         </div>
 
         <section id="roadmap" class="container" style="padding-bottom:40px; display:block;">
-           <div style="
-                border: 2px solid var(--g2);
-                border-radius: 12px;
-                padding: 20px;
-                text-align: center;
-                max-width: 600px;
-                margin: 0 auto;
-                box-shadow: 0 0 20px rgba(0,0,0,0.15);
-           ">
-                <h2 style="
-                     margin: 0;
-                     font-size: 32px;
-                     font-weight: 700;
-                     background: linear-gradient(90deg, var(--g1), var(--g2), var(--g3));
-                     -webkit-background-clip: text;
-                     background-clip: text;
-                     color: transparent;
-                ">
-                     ROADMAP
-          </h2>
-
+          <div class="roadmap-title-border">
+            <h2>
+              ROADMAP
+            </h2>
+          </div>
           <div class="roadmap-timeline">
             <!-- Aug-Sep Phase -->
             <div class="roadmap-phase">
@@ -206,13 +210,13 @@
               </div>
               <div class="phase-content">
                 <ul>
-                  <li>Launch <strong>next-generation marketplace architecture</strong> with streamlined discovery via <strong>/explore</strong>, <strong>/creators</strong>, and <strong>/purchases</strong> portals</li>
-                  <li>Deploy <strong>$PROMPTFI native token economy</strong>: seamless token transactions → Phantom integration → <strong>sub-second decryption</strong> → permanent access via <strong>My Purchases</strong></li>
+                  <li>Launch <strong>next-generation marketplace architecture</strong> with streamlined discovery via <strong>/explore</strong>, <strong>/creators</strong>, and <strong>/purchases</strong></li>
+                  <li>Deploy <strong>$PROMPTFI native token economy</strong>: seamless token transactions → Phantom integration → <strong>sub-second decryption</strong> → permanent access via <strong>/purchases</strong></li>
                   <li>Enterprise-grade <strong>security infrastructure</strong>: military-grade encryption, comprehensive error handling, advanced analytics and real-time monitoring</li>
                   <li><strong>Token Launch:</strong> Fair distribution, liquidity pools, staking mechanisms, and governance framework activation</li>
                 </ul>
                 <div class="targets">
-                  <strong>Performance Standards:</strong> <strong>sub-60-second</strong> end-to-end transactions, <strong>99.9%+</strong> unlock success rate, <strong>$PROMPTFI</strong> token <strong>$5M</strong> initial market cap
+                  <strong>Performance Standards:</strong> <strong>sub-60-second</strong> end-to-end transactions, <strong>99.9%+</strong> unlock success rate, <strong>$PROMPTFI</strong> token <strong>market cap $5M+</strong>
                 </div>
               </div>
             </div>
@@ -225,14 +229,14 @@
               </div>
               <div class="phase-content">
                 <ul>
-                  <li><strong>Creator Empowerment Platform:</strong> comprehensive onboarding system, dynamic <strong>$PROMPTFI</strong> pricing engine, advanced publishing workflows, intelligent version control</li>
+                  <li><strong>Creator Empowerment Platform:</strong> comprehensive onboarding system, dynamic <strong>$PROMPTFI</strong> pricing engine, advanced publishing workflows, intelligent versioning</li>
                   <li><strong>Community-Driven Quality Assurance:</strong> sophisticated rating algorithms with <strong>$PROMPTFI</strong> rewards and verified review systems</li>
                   <li><strong>Advanced Token Utilities:</strong> staking rewards for creators, governance voting rights, premium feature access, loyalty multipliers</li>
                   <li><strong>Strategic Token Partnerships:</strong> DEX listings, CEX negotiations, institutional adoption, DeFi protocol integrations</li>
                   <li><strong>Strategic Market Entry:</strong> curated launch with <strong>premier creator partnerships</strong>, weekly featured content program, aggressive social media expansion</li>
                 </ul>
                 <div class="targets">
-                  <strong>Market Penetration Goals:</strong> <strong>500+</strong> premium prompts, <strong>200+</strong> validated transactions, <strong>$PROMPTFI</strong> market cap <strong>$15M+</strong>, <strong>1000+</strong> token holders
+                  <strong>Market Penetration Goals:</strong> <strong>500+</strong> premium prompts, <strong>200+</strong> validated transactions, <strong>$PROMPTFI</strong> market cap <strong>$15M+</strong>
                 </div>
               </div>
             </div>
@@ -246,12 +250,12 @@
               <div class="phase-content">
                 <ul>
                   <li><strong>Advanced Commerce Features:</strong> dynamic collections and bundles, intelligent <strong>$PROMPTFI</strong> coupon systems, algorithmic featured placements</li>
-                  <li><strong>Creator Intelligence Suite:</strong> comprehensive analytics dashboard with <strong>$PROMPTFI</strong> earnings tracking (engagement → conversion → revenue → token rewards)</li>
+                  <li><strong>Creator Intelligence Suite:</strong> comprehensive analytics dashboard with <strong>$PROMPTFI</strong> earnings tracking (engagement → conversion → revenue → token)</li>
                   <li><strong>Next-Gen Discovery Engine:</strong> AI-powered search with <strong>$PROMPTFI</strong> boost features, semantic tagging, streamlined reporting workflows</li>
                   <li><strong>Token Ecosystem Growth:</strong> Major exchange listings, institutional partnerships, yield farming opportunities, cross-chain bridges</li>
                 </ul>
                 <div class="targets">
-                  <strong>Growth Milestones:</strong> <strong>2,000+</strong> weekly active users, <strong>800+</strong> monthly transactions, <strong>$PROMPTFI</strong> market cap <strong>$35M+</strong>, creator satisfaction <strong>≥60 NPS</strong>
+                  <strong>Growth Milestones:</strong> <strong>2,000+</strong> weekly active users, <strong>800+</strong> monthly transactions, <strong>$PROMPTFI</strong> market cap <strong>$35M+</strong>
                 </div>
               </div>
             </div>
@@ -270,7 +274,7 @@
                   <li><strong>DeFi Integration:</strong> Lending protocols, liquidity mining, institutional custody solutions, treasury diversification</li>
                 </ul>
                 <div class="targets">
-                  <strong>Enterprise Adoption:</strong> <strong>5,000+</strong> WAU, <strong>1,500+</strong> monthly transactions, <strong>$PROMPTFI</strong> market cap <strong>$60M+</strong>, <strong>100+</strong> enterprise teams
+                  <strong>Enterprise Adoption:</strong> <strong>5,000+</strong> WAU, <strong>1,500+</strong> monthly transactions, <strong>$PROMPTFI</strong> market cap <strong>$60M+</strong>
                 </div>
               </div>
             </div>
@@ -284,12 +288,12 @@
               <div class="phase-content">
                 <ul>
                   <li><strong>Advanced Trust Systems:</strong> AI-powered moderation with <strong>$PROMPTFI</strong> governance, creator verification protocols, community-driven quality control</li>
-                  <li><strong>Intelligent Recommendation Engine:</strong> machine learning-driven discovery with <strong>$PROMPTFI</strong> incentive alignment, collaborative filtering, personalized content curation</li>
+                  <li><strong>Intelligent Recommendation Engine:</strong> machine learning-driven discovery with <strong>$PROMPTFI</strong> incentive alignment, collaborative filtering, personalized content</li>
                   <li><strong>Global Market Expansion:</strong> multi-language platform rollout, regional compliance, international creator onboarding with localized <strong>$PROMPTFI</strong> support</li>
                   <li><strong>Token Utility Expansion:</strong> NFT marketplace integration, metaverse partnerships, gaming ecosystem adoption</li>
                 </ul>
                 <div class="targets">
-                  <strong>Global Standards:</strong> <strong>50%+</strong> customer lifetime value, <strong>$PROMPTFI</strong> market cap <strong>$80M+</strong>, <strong>10,000+</strong> active token holders, international compliance certification
+                  <strong>Global Standards:</strong> <strong>50%+</strong> customer lifetime value, <strong>$PROMPTFI</strong> market cap <strong>$80M+</strong>, <strong>10,000+</strong> active token holders
                 </div>
               </div>
             </div>
@@ -302,13 +306,13 @@
               </div>
               <div class="phase-content">
                 <ul>
-                  <li><strong>Global Compliance Infrastructure:</strong> automated tax/GST handling for <strong>$PROMPTFI</strong> transactions, international invoicing, comprehensive creator financial dashboard</li>
+                  <li><strong>Global Compliance Infrastructure:</strong> automated tax/GST handling for <strong>$PROMPTFI</strong> transactions, international invoicing, comprehensive creator financials</li>
                   <li><strong>Multi-Currency Optimization:</strong> real-time USD/EUR display with <strong>$PROMPTFI</strong> settlement, dynamic currency hedging, institutional trading pairs</li>
                   <li><strong>Advanced Monetization Models:</strong> sophisticated bundle algorithms, subscription economy with <strong>$PROMPTFI</strong> discounts, enterprise licensing programs</li>
                   <li><strong>Token Economy Maturation:</strong> Tier-1 exchange listings, institutional adoption, treasury management, <strong>$100M market cap milestone</strong></li>
                 </ul>
                 <div class="targets">
-                  <strong>Market Leadership:</strong> <strong>10,000+</strong> WAU, <strong>5,000+</strong> monthly transactions, <strong>$PROMPTFI</strong> market cap <strong>$100M+</strong>, <strong>25,000+</strong> token holders, <strong>99.99%</strong> uptime SLA
+                  <strong>Market Leadership:</strong> <strong>10,000+</strong> WAU, <strong>5,000+</strong> monthly transactions, <strong>$PROMPTFI</strong> market cap <strong>$100M+</strong>
                 </div>
               </div>
             </div>
@@ -350,11 +354,11 @@
         <h2>Creators (coming soon)</h2>
         <div class="card card-body">
           <p class="muted" style="margin-top:0">
-            PromptFi will let creators list prompts, set $PROMPTFI pricing, and get paid non‑custodially. Listings will be stored on IPFS with on‑chain receipts. Join the waitlist and be first to sell.
+            PromptFi will let creators list prompts, set $PROMPTFI pricing, and get paid non‑custodially. Listings will be stored on IPFS with on‑chain receipts. Join the waitlist and be first to know.
           </p>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <input id="wlEmail" class="input" placeholder="Email or Telegram"/>
-            <button class="btn glow" onclick="localStorage.setItem('pf_waitlist', (localStorage.getItem('pf_waitlist')||'') + '\n' + document.getElementById('wlEmail').value); this.textContent='Joined ✓';">Join Waitlist</button>
+            <button class="btn glow" onclick="localStorage.setItem('pf_waitlist', (localStorage.getItem('pf_waitlist')||'') + '\n' + document.getElementById('wlEmail').value); this.textContent='Joined!'; this.disabled=true;">Join Waitlist</button>
           </div>
         </div>
       </section>
