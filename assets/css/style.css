@@ -748,12 +748,13 @@ footer {
   
   /* Dropdown mobile optimization */
   #menu-dropdown {
-    right: -8px;
-    left: -8px;
-    min-width: auto;
-    max-width: none;
-    width: calc(100vw - 32px);
+    left: 0;
+    right: auto;
+    width: auto;
+    min-width: 160px;
+    max-width: 90vw;
   }
+
   
   .menu {
     max-height: 200px;
